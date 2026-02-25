@@ -4,7 +4,7 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Interceptor JWT
+// JWT automatique
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
@@ -15,4 +15,4 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export default api;   
+export default api;

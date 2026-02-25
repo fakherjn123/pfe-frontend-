@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import LoginPage from "../features/auth/pages/LoginPage";
 import CarsPage from "../features/cars/pages/CarsPage";
 import DashboardPage from "../features/admin/pages/DashboardPage";
@@ -8,17 +9,20 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+
         <Route path="/" element={<CarsPage />} />
+
         <Route path="/login" element={<LoginPage />} />
 
         <Route
-          path="/admin/dashboard"
+          path="/admin"
           element={
-            <ProtectedRoute role="admin">
+            <ProtectedRoute>
               <DashboardPage />
             </ProtectedRoute>
           }
         />
+
       </Routes>
     </BrowserRouter>
   );
