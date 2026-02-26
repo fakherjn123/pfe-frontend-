@@ -1,23 +1,19 @@
 import { useEffect, useState } from "react";
-import { getCarsService } from "../api/car.service";
+import { getCars } from "../api/car.service";
+import CarCard from "../components/CarCard";
 
 export default function CarsPage() {
+  const [cars, setCars] = useState([]);
 
-  const [cars,setCars]=useState([]);
-
-  useEffect(()=>{
-    getCarsService()
-      .then(res=>setCars(res.data));
-  },[]);
+  useEffect(() => {
+    getCars().then(res => setCars(res.data));
+  }, []);
 
   return (
     <div>
-      <h1>Cars</h1>
-
-      {cars.map(car=>(
-        <div key={car.id}>
-          {car.brand} - {car.model}
-        </div>
+      <h2>Cars</h2>
+      {cars.map(car => (
+        <CarCard key={car.id} car={car} />
       ))}
     </div>
   );

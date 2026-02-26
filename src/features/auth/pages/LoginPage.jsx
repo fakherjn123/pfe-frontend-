@@ -15,28 +15,41 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await login(form);
-    navigate("/");
+    try {
+      await login(form);
+      navigate("/");
+    } catch (error) {
+      alert("Login failed");
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        placeholder="Email"
-        onChange={(e)=>
-          setForm({...form,email:e.target.value})
-        }
-      />
+    <div style={{ padding: "50px" }}>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={(e)=>
+            setForm({...form,email:e.target.value})
+          }
+        />
 
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e)=>
-          setForm({...form,password:e.target.value})
-        }
-      />
+        <br /><br />
 
-      <button>Login</button>
-    </form>
+        <input
+          type="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={(e)=>
+            setForm({...form,password:e.target.value})
+          }
+        />
+
+        <br /><br />
+
+        <button type="submit">Login</button>
+      </form>
+    </div>
   );
 }

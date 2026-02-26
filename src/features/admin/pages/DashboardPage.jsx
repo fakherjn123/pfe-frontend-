@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { getStats } from "../api/dashboard.api";
+import api from "../../../config/api.config";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    getStats().then((res) => setStats(res.data));
+    api.get("/dashboard/stats")
+       .then(res => setStats(res.data));
   }, []);
 
   if (!stats) return <p>Loading...</p>;

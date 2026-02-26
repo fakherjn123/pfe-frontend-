@@ -5,3 +5,5 @@ export const loginService = (data) =>
 
 export const registerService = (data) =>
   api.post("/auth/register", data);
+export const logoutService = () =>
+  api.post("/auth/logout");
