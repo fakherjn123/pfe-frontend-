@@ -1,22 +1,17 @@
 import { useEffect, useState } from "react";
 import api from "../../../config/api.config";
 
-const sans = "'Inter', 'Helvetica Neue', sans-serif";
-
-function StatCard({ label, value, note, accent = "#0a0a0a" }) {
+function StatCard({ label, value, note, accentClass = "bg-slate-900" }) {
   return (
-    <div style={{
-      background: "#fff", border: "1px solid #ebebeb", borderRadius: 12,
-      padding: "22px 24px",
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-        <span style={{ color: "#bbb", fontSize: 12, fontWeight: 500 }}>{label}</span>
-        <div style={{ width: 8, height: 8, borderRadius: "50%", background: accent, marginTop: 3 }} />
+    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+      <div className="flex justify-between items-start mb-4">
+        <span className="text-slate-500 text-sm font-medium">{label}</span>
+        <div className={`w-2.5 h-2.5 rounded-full mt-1 ${accentClass}`} />
       </div>
-      <div style={{ color: "#0a0a0a", fontSize: 32, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1 }}>
-        {value ?? <span style={{ color: "#e0e0e0" }}>—</span>}
+      <div className="text-slate-900 text-3xl font-extrabold tracking-tight leading-none">
+        {value ?? <span className="text-slate-300">—</span>}
       </div>
-      {note && <div style={{ color: "#bbb", fontSize: 12, marginTop: 8 }}>{note}</div>}
+      {note && <div className="text-slate-500 text-xs mt-2">{note}</div>}
     </div>
   );
 }
@@ -33,87 +28,72 @@ export default function DashboardPage() {
   }, []);
 
   const SectionTitle = ({ children }) => (
-    <h2 style={{ color: "#bbb", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 14px" }}>
+    <h2 className="text-slate-400 text-xs font-semibold tracking-widest uppercase mb-4">
       {children}
     </h2>
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: sans, paddingTop: 64 }}>
+    <div className="min-h-screen bg-slate-50 pt-16">
       {/* Header */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #ebebeb", padding: "36px 40px" }}>
-        <div style={{ maxWidth: "100%", margin: "0 auto" }}>
-          <p style={{ color: "#bbb", fontSize: 12, margin: "0 0 6px" }}>
+      <div className="bg-white border-b border-slate-200 py-8 px-6 sm:px-10 shadow-sm">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-slate-500 text-sm mb-1.5 font-medium">
             {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </p>
-          <h1 style={{ color: "#0a0a0a", fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>
+          <h1 className="text-slate-900 text-3xl font-extrabold tracking-tight m-0">
             Dashboard
           </h1>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1160, margin: "0 auto", padding: "32px 40px 80px" }}>
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 py-8 pb-20">
         {/* Fleet */}
         <SectionTitle>Fleet overview</SectionTitle>
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
-          gap: 12, marginBottom: 28,
-        }}>
-          <StatCard label="Total vehicles" value={stats?.total_cars} accent="#6366f1" />
-          <StatCard label="Active" value={stats?.active_cars} accent="#22c55e" />
-          <StatCard label="Total rentals" value={stats?.total_rentals} accent="#f59e0b" />
-          <StatCard label="Ongoing" value={stats?.ongoing_rentals} note="In use" accent="#0ea5e9" />
-          <StatCard label="Confirmed" value={stats?.confirmed_rentals} note="Upcoming" accent="#8b5cf6" />
-          <StatCard label="Users" value={stats?.total_users} accent="#f43f5e" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
+          <StatCard label="Total vehicles" value={stats?.total_cars} accentClass="bg-indigo-500" />
+          <StatCard label="Active" value={stats?.active_cars} accentClass="bg-green-500" />
+          <StatCard label="Total rentals" value={stats?.total_rentals} accentClass="bg-amber-500" />
+          <StatCard label="Ongoing" value={stats?.ongoing_rentals} note="In use" accentClass="bg-sky-500" />
+          <StatCard label="Confirmed" value={stats?.confirmed_rentals} note="Upcoming" accentClass="bg-violet-500" />
+          <StatCard label="Users" value={stats?.total_users} accentClass="bg-rose-500" />
         </div>
 
         {/* Financial */}
         <SectionTitle>Revenue</SectionTitle>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 28 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           <StatCard
             label="Total revenue"
             value={financial ? `${financial.total_revenue} TND` : null}
             note={`${financial?.paid_payments ?? 0} paid`}
-            accent="#22c55e"
+            accentClass="bg-green-500"
           />
           <StatCard
             label="This month"
             value={financial ? `${financial.current_month_revenue} TND` : null}
-            accent="#f59e0b"
+            accentClass="bg-amber-500"
           />
-          <StatCard label="Payments" value={financial?.total_payments} accent="#6366f1" />
-          <StatCard label="Confirmed" value={financial?.paid_payments} accent="#0ea5e9" />
+          <StatCard label="Payments" value={financial?.total_payments} accentClass="bg-indigo-500" />
+          <StatCard label="Confirmed" value={financial?.paid_payments} accentClass="bg-sky-500" />
         </div>
 
         {/* Top cars */}
         {topCars.length > 0 && (
           <>
             <SectionTitle>Top vehicles</SectionTitle>
-            <div style={{ background: "#fff", border: "1px solid #ebebeb", borderRadius: 12, overflow: "hidden" }}>
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
               {topCars.map((car, i) => (
-                <div key={car.id} style={{
-                  display: "flex", alignItems: "center", padding: "16px 24px",
-                  borderBottom: i < topCars.length - 1 ? "1px solid #f5f5f5" : "none",
-                }}>
-                  <span style={{
-                    width: 24, color: "#ddd", fontSize: 13, fontWeight: 600, flexShrink: 0,
-                  }}>{i + 1}</span>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ color: "#0a0a0a", fontSize: 14, fontWeight: 600 }}>{car.brand} </span>
-                    <span style={{ color: "#aaa", fontSize: 14 }}>{car.model}</span>
+                <div key={car.id} className={`flex items-center p-4 sm:px-6 hover:bg-slate-50 transition-colors ${i < topCars.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                  <span className="w-8 text-slate-300 text-sm font-bold shrink-0">{i + 1}</span>
+                  <div className="flex-1">
+                    <span className="text-slate-900 text-sm font-semibold">{car.brand} </span>
+                    <span className="text-slate-500 text-sm">{car.model}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{
-                      height: 4, borderRadius: 2,
-                      width: `${Math.max(24, (car.total_rentals / (topCars[0]?.total_rentals || 1)) * 80)}px`,
-                      background: "#f0f0f0",
-                    }}>
-                      <div style={{
-                        height: "100%", borderRadius: 2, background: "#0a0a0a",
-                        width: `${(car.total_rentals / (topCars[0]?.total_rentals || 1)) * 100}%`,
-                      }} />
+                  <div className="flex items-center gap-4">
+                    <div className="h-1.5 rounded-full bg-slate-100 relative" style={{ width: `${Math.max(40, (car.total_rentals / (topCars[0]?.total_rentals || 1)) * 120)}px` }}>
+                      <div className="absolute top-0 left-0 h-full rounded-full bg-slate-900 transition-all duration-500" style={{ width: `${(car.total_rentals / (topCars[0]?.total_rentals || 1)) * 100}%` }} />
                     </div>
-                    <span style={{ color: "#0a0a0a", fontSize: 13, fontWeight: 700, minWidth: 20, textAlign: "right" }}>
+                    <span className="text-slate-900 text-sm font-bold min-w-[1.5rem] text-right">
                       {car.total_rentals}
                     </span>
                   </div>
@@ -124,17 +104,13 @@ export default function DashboardPage() {
         )}
 
         {/* Quick links */}
-        <div style={{ display: "flex", gap: 10, marginTop: 28, flexWrap: "wrap" }}>
-          {[{ label: "All invoices", href: "/admin/factures" }, { label: "Browse fleet", href: "/" }].map(({ label, href }) => (
-            <a key={label} href={href} style={{
-              color: "#666", textDecoration: "none", fontSize: 13, fontWeight: 500,
-              padding: "9px 18px", border: "1px solid #e8e8e8", borderRadius: 8,
-              background: "#fff", transition: "all 0.15s", display: "inline-block",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "#999"; e.currentTarget.style.color = "#0a0a0a"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.color = "#666"; }}
-            >{label} →</a>
-          ))}
+        <div className="flex gap-3 mt-10 flex-wrap">
+          <a href="/admin/factures" className="text-slate-600 text-sm font-medium px-5 py-2.5 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-all shadow-sm">
+            All invoices &rarr;
+          </a>
+          <a href="/" className="text-slate-600 text-sm font-medium px-5 py-2.5 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-all shadow-sm">
+            Browse fleet &rarr;
+          </a>
         </div>
       </div>
     </div>

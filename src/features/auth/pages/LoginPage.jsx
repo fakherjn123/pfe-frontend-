@@ -3,13 +3,7 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
-const sans = "'Inter', 'Helvetica Neue', sans-serif";
-const inputStyle = {
-  width: "100%", background: "#fafafa", border: "1px solid #e8e8e8",
-  color: "#0a0a0a", padding: "11px 14px", fontSize: 14,
-  fontFamily: sans, borderRadius: 9, outline: "none",
-  boxSizing: "border-box", transition: "border 0.15s",
-};
+const inputClass = "w-full bg-slate-50 border border-slate-200 text-slate-900 px-4 py-3 text-sm rounded-xl outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all";
 
 export default function LoginPage() {
   const { login } = useContext(AuthContext);
@@ -19,81 +13,95 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    await login({ email, password });
-    navigate("/"); // redirect فقط
-  } catch (err) {
-    if (err.response?.status === 401) {
-      setError("Invalid email or password");
-    } else {
-      setError("Server error");
+    try {
+      await login(form);
+      navigate("/"); // redirect فقط
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError("Invalid email or password");
+      } else {
+        setError("Server error");
+      }
+    } finally {
+      setLoading(false);
     }
-  }
-};
+  };
+
   return (
-    <div style={{
-      minHeight: "100vh", background: "#fafafa", fontFamily: sans,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "40px 24px",
-    }}>
-      <div style={{ width: "100%", maxWidth: 400 }}>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Decorative background blur */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <Link to="/" style={{ textDecoration: "none" }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "#0a0a0a", letterSpacing: "0.06em" }}>JNAYEH</span>
-            <span style={{ fontSize: 12, color: "#bbb", marginLeft: 8 }}>LOCATION</span>
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-flex items-center gap-2 group">
+            <span className="text-slate-900 text-xl font-extrabold tracking-tight group-hover:text-indigo-600 transition-colors">JNAYEH</span>
+            <span className="w-px h-5 bg-slate-300" />
+            <span className="text-slate-500 text-xs font-semibold tracking-widest">LOCATION</span>
           </Link>
         </div>
 
-        <div style={{
-          background: "#fff", border: "1px solid #ebebeb",
-          borderRadius: 16, padding: "36px 32px",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.04)",
-        }}>
-          <h1 style={{
-            color: "#0a0a0a", fontSize: 24, fontWeight: 800,
-            margin: "0 0 6px", letterSpacing: "-0.02em",
-          }}>Welcome back</h1>
-          <p style={{ color: "#aaa", fontSize: 13, margin: "0 0 28px" }}>
+        <div className="bg-white/80 backdrop-blur-xl border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <h1 className="text-slate-900 text-2xl font-extrabold mb-1 tracking-tight">
+            Welcome back
+          </h1>
+          <p className="text-slate-500 text-sm mb-8 font-medium">
             Sign in to your account
           </p>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ color: "#666", fontSize: 12, fontWeight: 500, display: "block", marginBottom: 6 }}>Email address</label>
-              <input type="email" required value={form.email}
+            <div className="mb-4">
+              <label className="text-slate-600 text-xs font-bold block mb-2 uppercase tracking-wide">
+                Email address
+              </label>
+              <input
+                type="email"
+                required
+                value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                placeholder="you@example.com" style={inputStyle} />
+                placeholder="you@example.com"
+                className={inputClass}
+              />
             </div>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ color: "#666", fontSize: 12, fontWeight: 500, display: "block", marginBottom: 6 }}>Password</label>
-              <input type="password" required value={form.password}
+            <div className="mb-6">
+              <label className="text-slate-600 text-xs font-bold block mb-2 uppercase tracking-wide">
+                Password
+              </label>
+              <input
+                type="password"
+                required
+                value={form.password}
                 onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                placeholder="••••••••" style={inputStyle} />
+                placeholder="••••••••"
+                className={inputClass}
+              />
             </div>
 
             {error && (
-              <div style={{
-                background: "#fff5f5", border: "1px solid #fecaca", borderRadius: 8,
-                color: "#dc2626", fontSize: 13, padding: "10px 14px", marginBottom: 16,
-              }}>{error}</div>
+              <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-medium px-4 py-3 rounded-xl mb-6">
+                {error}
+              </div>
             )}
 
-            <button type="submit" disabled={loading} style={{
-              width: "100%", background: "#0a0a0a", color: "#fff", border: "none",
-              padding: "12px", fontSize: 14, fontFamily: sans, fontWeight: 700,
-              borderRadius: 9, cursor: "pointer", letterSpacing: "-0.01em",
-              opacity: loading ? 0.7 : 1,
-            }}>{loading ? "Signing in..." : "Sign in"}</button>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full bg-slate-900 text-white border-0 py-3.5 px-4 text-sm font-bold rounded-xl tracking-wide transition-all shadow-sm focus:ring-4 focus:ring-slate-200 ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-slate-800'}`}
+            >
+              {loading ? "Signing in..." : "Sign in"}
+            </button>
           </form>
         </div>
 
-        <p style={{ color: "#aaa", fontSize: 13, textAlign: "center", marginTop: 20 }}>
+        <p className="text-slate-500 text-sm font-medium text-center mt-8">
           Don't have an account?{" "}
-          <Link to="/register" style={{ color: "#0a0a0a", fontWeight: 600, textDecoration: "none" }}>
+          <Link to="/register" className="text-slate-900 font-bold hover:text-indigo-600 transition-colors">
             Register
           </Link>
         </p>

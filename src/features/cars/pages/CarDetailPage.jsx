@@ -18,17 +18,17 @@ export default function CarDetailPage() {
   const [message, setMessage] = useState(null);
 
   useEffect(() => {
-  const carId = id?.toString().split(":")[0];
+    const carId = id?.toString().split(":")[0];
 
-  api.get(`/cars/${carId}`)
-    .then(r => setCar(r.data))
-    .catch(console.error);
+    api.get(`/cars/${carId}`)
+      .then(r => setCar(r.data))
+      .catch(console.error);
 
-  api.get(`/reviews/${carId}`)   // 🔥 FIXED
-    .then(r => setReviews(r.data))
-    .catch(console.error);
+    api.get(`/reviews/${carId}`)   // 🔥 FIXED
+      .then(r => setReviews(r.data))
+      .catch(console.error);
 
-}, [id]);
+  }, [id]);
 
   const days = startDate && endDate
     ? Math.max(0, Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000))
@@ -41,8 +41,8 @@ export default function CarDetailPage() {
     setSubmitting(true);
     try {
       const res = await api.post("/rentals", { car_id: Number(id), start_date: startDate, end_date: endDate });
-      setMessage({ type: "success", text: `Booking confirmed — ${res.data.final_total} TND` });
-      setTimeout(() => navigate("/rentals"), 2000);
+      setMessage({ type: "success", text: `Booking recorded — ${res.data.final_total} TND` });
+      setTimeout(() => navigate(`/payment/${res.data.rental.id}`), 2000);
     } catch (err) {
       setMessage({ type: "error", text: err.response?.data?.message || "Booking failed." });
     }
@@ -50,23 +50,23 @@ export default function CarDetailPage() {
   };
 
   const addReview = async () => {
-  try {
-    await api.post("/reviews", {
-      car_id: id,
-      rating: Number(rating),
-      comment
-    });
+    try {
+      await api.post("/reviews", {
+        car_id: id,
+        rating: Number(rating),
+        comment
+      });
 
-    setComment("");
-    setRating(7);
+      setComment("");
+      setRating(7);
 
-    const r = await api.get(`/reviews/${id}`);  // 🔥 FIXED
-    setReviews(r.data);
+      const r = await api.get(`/reviews/${id}`);  // 🔥 FIXED
+      setReviews(r.data);
 
-  } catch (err) {
-    alert(err.response?.data?.message || "Review failed");
-  }
-};
+    } catch (err) {
+      alert(err.response?.data?.message || "Review failed");
+    }
+  };
 
   if (!car) return (
     <div style={{ minHeight: "100vh", background: "#fafafa", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: sans, color: "#ccc", paddingTop: 64 }}>
@@ -130,6 +130,15 @@ export default function CarDetailPage() {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 40px 80px", display: "grid", gridTemplateColumns: "1fr 340px", gap: 20 }}>
         {/* Left */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Image */}
+          <div style={{ background: "#fff", border: "1px solid #ebebeb", borderRadius: 12, overflow: "hidden" }}>
+            <img
+              src={car.image ? `http://localhost:3000${car.image}` : "https://picsum.photos/800/500"}
+              alt={car.brand}
+              style={{ width: "100%", height: 400, objectFit: "cover", display: "block" }}
+            />
+          </div>
+
           {/* Specs */}
           <div style={{ background: "#fff", border: "1px solid #ebebeb", borderRadius: 12, padding: "28px" }}>
             <h2 style={{ color: "#0a0a0a", fontSize: 15, fontWeight: 700, margin: "0 0 20px" }}>Vehicle details</h2>

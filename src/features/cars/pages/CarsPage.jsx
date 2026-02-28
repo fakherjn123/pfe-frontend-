@@ -2,67 +2,54 @@ import { useEffect, useState } from "react";
 import { getCars } from "../api/car.service";
 import { Link } from "react-router-dom";
 
-const sans = "'Inter', 'Helvetica Neue', sans-serif";
-
 function CarCard({ car }) {
-  const [hovered, setHovered] = useState(false);
   return (
     <Link
       to={`/cars/${car.id}`}
-      style={{ textDecoration: "none" }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className="group block"
     >
-      <div style={{
-        background: "#fff",
-        border: `1px solid ${hovered ? "#c8c8c8" : "#ebebeb"}`,
-        borderRadius: 12,
-        padding: "28px 24px",
-        transition: "all 0.2s",
-        boxShadow: hovered ? "0 8px 32px rgba(0,0,0,0.07)" : "0 1px 4px rgba(0,0,0,0.03)",
-        transform: hovered ? "translateY(-2px)" : "none",
-        cursor: "pointer",
-      }}>
-        {/* Top row */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-          <div style={{
-            width: 8, height: 8, borderRadius: "50%", marginTop: 5,
-            background: car.available ? "#22c55e" : "#f87171",
-          }} />
-          <span style={{
-            fontSize: 11, color: "#bbb", fontWeight: 400, letterSpacing: "0.04em",
-          }}>#{String(car.id).padStart(3, "0")}</span>
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden transition-all duration-300 group-hover:border-slate-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group-hover:-translate-y-1">
+
+        {/* Full-width edge-to-edge image */}
+        <div className="w-full h-48 bg-[#f9f9f9] flex items-center justify-center overflow-hidden border-b border-slate-100">
+          <img
+            src={car.image ? `http://localhost:3000${car.image}` : "https://picsum.photos/400/250"}
+            alt={car.brand}
+            className="w-full h-full object-cover"
+          />
         </div>
 
-        {/* Name */}
-        <h3 style={{
-          color: "#0a0a0a", fontFamily: sans, fontWeight: 700,
-          fontSize: 18, margin: "0 0 3px", letterSpacing: "-0.01em",
-        }}>{car.brand}</h3>
-        <p style={{
-          color: "#aaa", fontFamily: sans, fontSize: 13,
-          margin: "0 0 24px", fontWeight: 400,
-        }}>{car.model}</p>
+        <div className="p-5">
+          {/* Top row */}
+          <div className="flex justify-between items-start mb-4">
+            <div className={`w-2 h-2 rounded-full mt-1.5 ${car.available ? 'bg-green-500' : 'bg-red-400'}`} />
+            <span className="text-slate-400 text-xs font-semibold tracking-wider">
+              #{String(car.id).padStart(3, "0")}
+            </span>
+          </div>
 
-        {/* Footer */}
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          paddingTop: 16, borderTop: "1px solid #f0f0f0",
-        }}>
-          <div>
-            <span style={{ color: "#bbb", fontSize: 11 }}>per day</span>
-            <div style={{ color: "#0a0a0a", fontWeight: 700, fontSize: 20, letterSpacing: "-0.02em" }}>
-              {car.price_per_day} <span style={{ color: "#ccc", fontSize: 12, fontWeight: 400 }}>TND</span>
+          {/* Name */}
+          <h3 className="text-slate-900 font-extrabold text-xl mb-1 tracking-tight">
+            {car.brand}
+          </h3>
+          <p className="text-slate-500 text-sm mb-5 font-medium">
+            {car.model}
+          </p>
+
+          {/* Footer */}
+          <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+            <div>
+              <span className="text-slate-400 text-xs font-medium block mb-0.5">per day</span>
+              <div className="text-slate-900 font-extrabold text-2xl tracking-tight leading-none">
+                {car.price_per_day} <span className="text-slate-300 text-sm font-medium ml-0.5">TND</span>
+              </div>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center transition-all duration-300 group-hover:bg-slate-900 group-hover:text-white shrink-0">
+              &rarr;
             </div>
           </div>
-          <div style={{
-            background: hovered ? "#0a0a0a" : "#f5f5f5",
-            color: hovered ? "#fff" : "#999",
-            width: 32, height: 32, borderRadius: "50%",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 14, transition: "all 0.2s",
-          }}>→</div>
         </div>
+
       </div>
     </Link>
   );
@@ -86,55 +73,48 @@ export default function CarsPage() {
 
   useEffect(() => { fetchCars(); }, []);
 
-  const inputStyle = {
-    background: "#fff", border: "1px solid #e8e8e8",
-    color: "#0a0a0a", padding: "9px 14px", fontSize: 13,
-    fontFamily: sans, borderRadius: 8, outline: "none",
-    flex: 1, minWidth: 140, transition: "border 0.15s",
-  };
+  const inputClass = "bg-white border border-slate-200 text-slate-900 px-4 py-2.5 text-sm rounded-xl outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all flex-1 min-w-[140px]";
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: sans, paddingTop: 64 }}>
+    <div className="min-h-screen bg-slate-50 pt-16">
       {/* Hero */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #ebebeb", padding: "56px 40px 40px" }}>
-        <div style={{ maxWidth: "100%", margin: "0 auto" }}>
-          <p style={{ color: "#bbb", fontSize: 12, letterSpacing: "0.12em", margin: "0 0 10px", fontWeight: 500, textTransform: "uppercase" }}>
+      <div className="bg-white border-b border-slate-200 py-12 px-6 sm:px-10 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <p className="text-slate-400 text-xs font-semibold tracking-widest uppercase mb-3">
             Available Fleet
           </p>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20 }}>
-            <h1 style={{
-              color: "#0a0a0a", fontWeight: 800, fontSize: "clamp(28px, 4vw, 48px)",
-              margin: 0, letterSpacing: "-0.03em", lineHeight: 1.1,
-            }}>Find your<br />perfect car</h1>
-            <span style={{ color: "#bbb", fontSize: 13 }}>{cars.length} vehicles</span>
+          <div className="flex justify-between items-end flex-wrap gap-6">
+            <h1 className="text-slate-900 font-extrabold text-4xl sm:text-5xl tracking-tight leading-tight m-0">
+              Find your<br />perfect car
+            </h1>
+            <span className="text-slate-600 text-sm font-medium bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200">
+              {cars.length} vehicles
+            </span>
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: "100%", margin: "0 auto", padding: "32px 40px 80px" }}>
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 py-8 pb-20">
         {/* Filters */}
-        <div style={{
-          background: "#fff", border: "1px solid #ebebeb", borderRadius: 12,
-          padding: "16px 20px", marginBottom: 28,
-          display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center",
-        }}>
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 mb-8 flex gap-3 flex-wrap items-center shadow-sm">
           <input
             placeholder="Brand (e.g. BMW)"
             value={filters.brand}
             onChange={e => setFilters(f => ({ ...f, brand: e.target.value }))}
-            style={inputStyle}
+            className={inputClass}
           />
           <input
             placeholder="Max price (TND)"
             type="number"
             value={filters.maxPrice}
             onChange={e => setFilters(f => ({ ...f, maxPrice: e.target.value }))}
-            style={inputStyle}
+            className={inputClass}
           />
           <select
             value={filters.available}
             onChange={e => setFilters(f => ({ ...f, available: e.target.value }))}
-            style={{ ...inputStyle, flex: "unset", color: filters.available ? "#0a0a0a" : "#aaa" }}
+            className={`${inputClass} flex-none ${filters.available ? "text-slate-900" : "text-slate-400"}`}
           >
             <option value="">All status</option>
             <option value="true">Available</option>
@@ -142,26 +122,19 @@ export default function CarsPage() {
           </select>
           <button
             onClick={fetchCars}
-            style={{
-              background: "#0a0a0a", color: "#fff", border: "none",
-              padding: "9px 22px", fontSize: 13, fontFamily: sans,
-              fontWeight: 600, borderRadius: 8, cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
-          >Search</button>
+            className="bg-slate-900 text-white border-0 px-6 py-2.5 text-sm font-semibold rounded-xl cursor-pointer whitespace-nowrap hover:bg-slate-800 transition-all shadow-sm focus:ring-4 focus:ring-slate-200"
+          >
+            Search
+          </button>
         </div>
 
         {/* Grid */}
         {loading ? (
-          <div style={{ color: "#ccc", padding: "80px 0", textAlign: "center", fontSize: 13 }}>Loading vehicles...</div>
+          <div className="text-slate-400 py-20 text-center text-sm font-medium">Loading vehicles...</div>
         ) : cars.length === 0 ? (
-          <div style={{ color: "#ccc", padding: "80px 0", textAlign: "center", fontSize: 13 }}>No vehicles found.</div>
+          <div className="text-slate-400 py-20 text-center text-sm font-medium">No vehicles found.</div>
         ) : (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-            gap: 16,
-          }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {cars.map(car => <CarCard key={car.id} car={car} />)}
           </div>
         )}

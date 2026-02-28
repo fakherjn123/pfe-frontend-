@@ -77,9 +77,13 @@ export default function ManagerCarsPage() {
       }
 
       if (isEdit) {
-        await api.put(`/cars/${form.id}`, formData);
+        await api.put(`/cars/${form.id}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       } else {
-        await api.post("/cars", formData);
+        await api.post("/cars", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
 
       setIsOpen(false);
@@ -143,7 +147,8 @@ export default function ManagerCarsPage() {
               style={{
                 width: "100%",
                 height: 180,
-                objectFit: "cover",
+                objectFit: "contain",
+                backgroundColor: "#f9f9f9", // Add a small background in case the image doesn't take full width
                 borderRadius: 8,
               }}
             />
@@ -254,6 +259,9 @@ export default function ManagerCarsPage() {
                 alt="preview"
                 style={{
                   width: "100%",
+                  height: 180,
+                  objectFit: "contain",
+                  backgroundColor: "#f9f9f9",
                   marginTop: 10,
                   borderRadius: 8
                 }}
