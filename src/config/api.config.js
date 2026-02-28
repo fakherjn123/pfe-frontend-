@@ -3,12 +3,10 @@ import { ENV } from "./env.config";
 
 const api = axios.create({
   baseURL: ENV.API_URL,
-  withCredentials: true, 
   headers: {
     "Content-Type": "application/json"
   }
 });
-
 
 api.interceptors.request.use(
   (config) => {
@@ -34,4 +32,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default api; 

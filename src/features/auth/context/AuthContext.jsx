@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 import api from "../../../config/api.config";
 
 export const AuthContext = createContext();
@@ -6,14 +6,24 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
+  // 🔥 RESTORE USER ON APP LOAD
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (storedUser && token) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const login = async (data) => {
-    const res = await api.post("/auth/login", data);
+  const res = await api.post("/auth/login", data);
 
-    // 🔥 STOCKAGE CORRECT DU TOKEN
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
+  localStorage.setItem("token", res.data.token);
+  localStorage.setItem("user", JSON.stringify(res.data.user));
 
-    setUser(res.data.user);
+  setUser(res.data.user);
+
   };
 
   const logout = () => {
