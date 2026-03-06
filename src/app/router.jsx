@@ -13,6 +13,7 @@ import PaymentPage from "../features/payments/pages/PaymentPage";
 import MyFacturesPage from "../features/factures/pages/MyFacturesPage";
 import AllFacturesPage from "../features/admin/pages/AllFacturesPage";
 import AllRentalsPage from "../features/admin/pages/AllRentalsPage";
+import RentalHistoryPage from "../features/admin/pages/RentalHistoryPage";
 import ManagerPaymentsPage from "../features/admin/pages/ManagePaymentsPage";
 import ReviewsPage from "../pages/Admin/Reviews";
 import ClientsPage from "../pages/Admin/Clients";
@@ -60,6 +61,9 @@ export default function Router() {
         } />
         <Route path="/admin/rentals" element={
           <ProtectedRoute role="admin"><AllRentalsPage /></ProtectedRoute>
+        } />
+        <Route path="/admin/rentals/history" element={
+          <ProtectedRoute role="admin"><RentalHistoryPage /></ProtectedRoute>
         } />
         <Route path="/admin/reviews" element={
           <ProtectedRoute role="admin"><ReviewsPage /></ProtectedRoute>

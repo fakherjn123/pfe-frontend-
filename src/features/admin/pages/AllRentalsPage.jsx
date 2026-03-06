@@ -29,13 +29,22 @@ export default function AllRentalsPage() {
     return (
         <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: sans, paddingTop: 64 }}>
             <div style={{ background: "#fff", borderBottom: "1px solid #ebebeb", padding: "36px 40px" }}>
-                <div style={{ maxWidth: 900, margin: "0 auto" }}>
-                    <h1 style={{ color: "#0a0a0a", fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>
-                        All Rentals
-                    </h1>
-                    <p style={{ color: "#bbb", fontSize: 13, margin: "6px 0 0" }}>
-                        {rentals.length} total booking{rentals.length !== 1 ? "s" : ""}
-                    </p>
+                <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                        <h1 style={{ color: "#0a0a0a", fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>
+                            All Rentals
+                        </h1>
+                        <p style={{ color: "#bbb", fontSize: 13, margin: "6px 0 0" }}>
+                            {rentals.length} total booking{rentals.length !== 1 ? "s" : ""}
+                        </p>
+                    </div>
+                    <button onClick={() => window.location.href = '/admin/rentals/history'} style={{
+                        background: "#0a0a0a", color: "#fff", border: "none", padding: "10px 18px",
+                        fontSize: 13, fontWeight: 600, borderRadius: 8, cursor: "pointer",
+                        fontFamily: sans, transition: "opacity 0.2s"
+                    }} onMouseEnter={e => e.currentTarget.style.opacity = 0.8} onMouseLeave={e => e.currentTarget.style.opacity = 1}>
+                        Voir l'Historique Mensuel
+                    </button>
                 </div>
             </div>
 

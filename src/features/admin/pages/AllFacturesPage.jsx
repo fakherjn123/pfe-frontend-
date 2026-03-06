@@ -23,7 +23,7 @@ export default function AllFacturesPage() {
   const total = filtered.reduce((s, f) => s + Number(f.total), 0);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: sans, paddingTop: 64 }}>
+    <main className="flex-1 overflow-y-auto bg-slate-50 min-h-screen pt-20">
       <div style={{ background: "#fff", borderBottom: "1px solid #ebebeb", padding: "36px 40px" }}>
         <div style={{ maxWidth: 1160, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
           <div>
@@ -108,6 +108,6 @@ export default function AllFacturesPage() {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

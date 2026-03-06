@@ -87,7 +87,6 @@ const Services = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Suivi de Maintenance</h2>
-                    <p className="text-slate-500 dark:text-slate-400">Entretiens gérés depuis la base de données en temps réel.</p>
                 </div>
                 <button
                     onClick={openModal}

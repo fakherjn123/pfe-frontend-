@@ -38,7 +38,6 @@ const Clients = () => {
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                         <h2 className="text-3xl font-black text-slate-900 tracking-tight">Clients</h2>
-                        <p className="text-slate-500 mt-2 text-sm max-w-xl">Gérez votre base de clients, consultez leur historique de location et leurs factures générées.</p>
                     </div>
                     <button className="bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-slate-900/20 cursor-pointer">
                         <span className="material-symbols-outlined text-lg">person_add</span>

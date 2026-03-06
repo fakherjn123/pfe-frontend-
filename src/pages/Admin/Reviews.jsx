@@ -285,17 +285,7 @@ export default function Reviews() {
 
     return (
         <main className="flex-1 overflow-y-auto bg-slate-50 min-h-screen">
-            {/* Header */}
-            <header className="sticky top-0 z-10 flex flex-col sm:flex-row sm:items-center justify-between px-8 py-5 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-                <div className="flex flex-col">
-                    <div className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-1">
-                        Relation Client
-                    </div>
-                    <h2 className="text-2xl font-black tracking-tight text-slate-900">
-                        Avis & Réponses IA
-                    </h2>
-                </div>
-            </header>
+            
 
             <div className="p-8 space-y-6 max-w-7xl mx-auto w-full">
 
@@ -318,7 +308,6 @@ export default function Reviews() {
                     <StatCard icon="📊" label="Total Avis" value={reviews.length} colorClass="text-blue-600" bgClass="bg-blue-50" />
                     <StatCard icon="⭐" label="Note Moyenne" value={`${avgRating}/10`} colorClass="text-amber-500" bgClass="bg-amber-50" />
                     <StatCard icon="😊" label="Avis Positifs" value={`${positivePercent}%`} colorClass="text-green-600" bgClass="bg-green-50" />
-                    <StatCard icon="✨" label="Réponses IA" value={aiRepliesCount} colorClass="text-indigo-600" bgClass="bg-indigo-50" />
                 </div>
 
                 {/* Controls Bar */}

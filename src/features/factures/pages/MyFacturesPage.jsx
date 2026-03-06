@@ -15,7 +15,7 @@ export default function MyFacturesPage() {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: sans, paddingTop: 64 }}>
+    <main className="flex-1 overflow-y-auto bg-slate-50 min-h-screen pt-20">
       <div style={{ background: "#fff", borderBottom: "1px solid #ebebeb", padding: "36px 40px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <h1 style={{ color: "#0a0a0a", fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>
@@ -75,6 +75,6 @@ export default function MyFacturesPage() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
