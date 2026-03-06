@@ -6,6 +6,7 @@ import CarDetailPage from "../features/cars/pages/CarDetailPage";
 import RegisterPage from "../features/auth/pages/RegisterPage";
 import CarsPage from "../features/cars/pages/CarsPage";
 import LoginPage from "../features/auth/pages/LoginPage";
+import OAuthSuccessPage from "../features/auth/pages/OAuthSuccessPage";
 import DashboardPage from "../pages/Admin/Dashboard"; // Use the main Feature Dashboard
 import MyRentalsPage from "../features/rentals/pages/MyRentalsPage";
 import PaymentPage from "../features/payments/pages/PaymentPage";
@@ -28,6 +29,7 @@ export default function Router() {
         <Route path="/cars/:id" element={<CarDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/oauth-success" element={<OAuthSuccessPage />} />
 
         {/* CLIENT */}
         <Route path="/rentals" element={

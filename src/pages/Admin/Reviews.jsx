@@ -111,7 +111,7 @@ const ReviewRow = ({ review, onAiReply }) => {
 
                 {/* Rating */}
                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black shrink-0 border ${sentimentColorBg} ${sentimentColorText} ${sentimentColorBorder}`}>
-                    {sentiment.emoji} {review.rating}/5
+                    {sentiment.emoji} {review.rating}/10
                 </div>
 
                 {/* Comment preview */}
@@ -254,7 +254,6 @@ export default function Reviews() {
         }
     };
 
-    // Stats
     const avgRating = reviews.length
         ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
         : '—';
@@ -317,7 +316,7 @@ export default function Reviews() {
                 {/* KPI Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <StatCard icon="📊" label="Total Avis" value={reviews.length} colorClass="text-blue-600" bgClass="bg-blue-50" />
-                    <StatCard icon="⭐" label="Note Moyenne" value={`${avgRating}/5`} colorClass="text-amber-500" bgClass="bg-amber-50" />
+                    <StatCard icon="⭐" label="Note Moyenne" value={`${avgRating}/10`} colorClass="text-amber-500" bgClass="bg-amber-50" />
                     <StatCard icon="😊" label="Avis Positifs" value={`${positivePercent}%`} colorClass="text-green-600" bgClass="bg-green-50" />
                     <StatCard icon="✨" label="Réponses IA" value={aiRepliesCount} colorClass="text-indigo-600" bgClass="bg-indigo-50" />
                 </div>

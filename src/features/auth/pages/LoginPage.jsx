@@ -89,8 +89,18 @@ export default function LoginPage() {
               width: "100%", background: "#0a0a0a", color: "#fff", border: "none",
               padding: "12px", fontSize: 14, fontFamily: sans, fontWeight: 700,
               borderRadius: 9, cursor: "pointer", letterSpacing: "-0.01em",
-              opacity: loading ? 0.7 : 1,
+              opacity: loading ? 0.7 : 1, marginBottom: 12,
             }}>{loading ? "Signing in..." : "Sign in"}</button>
+
+            <button type="button" onClick={() => window.location.href = 'http://localhost:3000/api/auth/google'} style={{
+              width: "100%", background: "#fff", color: "#0a0a0a", border: "1px solid #e8e8e8",
+              padding: "12px", fontSize: 14, fontFamily: sans, fontWeight: 600,
+              borderRadius: 9, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              transition: "background 0.2s"
+            }}>
+              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: 18, height: 18 }} />
+              Continuer avec Google
+            </button>
           </form>
         </div>
 
