@@ -26,7 +26,7 @@ export default function Navbar() {
 
   const navLinks = [
     { to: "/", label: "Fleet", icon: "🚗" },
-    ...(user
+    ...(user && user.role !== "admin"
       ? [
         { to: "/rentals", label: "My Rentals", icon: "📋" },
         { to: "/facture", label: "Invoices", icon: "📄" },
@@ -38,7 +38,9 @@ export default function Navbar() {
         { to: "/admin/cars", label: "Cars", icon: "🏎️" },
         { to: "/admin/clients", label: "Clients", icon: "👥" },
         { to: "/admin/payments", label: "Payments", icon: "💳" },
-        { to: "/admin/factures", label: "Financials", icon: "💰" },
+        { to: "/admin/rentals", label: "Rentals", icon: "📋" },
+        { to: "/admin/factures", label: "Invoices", icon: "💰" },
+        { to: "/admin/services", label: "Maintenance", icon: "🔧" },
         { to: "/admin/reviews", label: "Reviews", icon: "⭐" },
       ]
       : []),
@@ -79,6 +81,9 @@ export default function Navbar() {
           transform: translateY(-1px);
         }
       `}</style>
+
+      {/* Invisible spacer to prevent content overlap caused by fixed Navbar */}
+      <div style={{ height: scrolled ? 60 : 70, transition: "height 0.3s ease", width: "100%", flexShrink: 0 }} />
 
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,

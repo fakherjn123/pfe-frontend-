@@ -5,8 +5,8 @@ const NAV = [
   { to: '/admin/dashboard', icon: 'grid_view', label: 'Dashboard' },
   { to: '/admin/ai-dashboard', icon: 'psychology', label: 'Analyse IA' },
   { to: '/admin/cars', icon: 'garage', label: 'Flotte' },
-  { to: '/admin/contracts', icon: 'description', label: 'Contrats' },
-  { to: '/admin/invoices', icon: 'receipt_long', label: 'Factures' },
+  { to: '/admin/rentals', icon: 'description', label: 'Locations' },
+  { to: '/admin/factures', icon: 'receipt_long', label: 'Factures' },
   { to: '/admin/services', icon: 'build_circle', label: 'Maintenance' },
   { to: '/admin/clients', icon: 'group', label: 'Clients' },
 ];

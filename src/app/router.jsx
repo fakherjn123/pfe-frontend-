@@ -11,10 +11,12 @@ import MyRentalsPage from "../features/rentals/pages/MyRentalsPage";
 import PaymentPage from "../features/payments/pages/PaymentPage";
 import MyFacturesPage from "../features/factures/pages/MyFacturesPage";
 import AllFacturesPage from "../features/admin/pages/AllFacturesPage";
+import AllRentalsPage from "../features/admin/pages/AllRentalsPage";
 import ManagerPaymentsPage from "../features/admin/pages/ManagePaymentsPage";
 import ReviewsPage from "../pages/Admin/Reviews";
 import ClientsPage from "../pages/Admin/Clients";
 import ClientDetail from "../pages/Admin/ClientDetail";
+import ServicesPage from "../pages/Admin/Services";
 
 export default function Router() {
   return (
@@ -54,8 +56,14 @@ export default function Router() {
         <Route path="/admin/factures" element={
           <ProtectedRoute role="admin"><AllFacturesPage /></ProtectedRoute>
         } />
+        <Route path="/admin/rentals" element={
+          <ProtectedRoute role="admin"><AllRentalsPage /></ProtectedRoute>
+        } />
         <Route path="/admin/reviews" element={
           <ProtectedRoute role="admin"><ReviewsPage /></ProtectedRoute>
+        } />
+        <Route path="/admin/services" element={
+          <ProtectedRoute role="admin"><ServicesPage /></ProtectedRoute>
         } />
         <Route path="/admin/clients" element={
           <ProtectedRoute role="admin"><ClientsPage /></ProtectedRoute>

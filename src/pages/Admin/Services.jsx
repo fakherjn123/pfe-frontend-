@@ -91,7 +91,7 @@ const Services = () => {
                 </div>
                 <button
                     onClick={openModal}
-                    className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 font-semibold shadow-lg shadow-primary/20 transition-all cursor-pointer"
+                    className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 font-semibold shadow-lg shadow-slate-900/20 transition-all cursor-pointer"
                 >
                     <span className="material-symbols-outlined">add_task</span>
                     Planifier un Entretien
