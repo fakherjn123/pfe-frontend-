@@ -73,8 +73,8 @@ const Services = () => {
 
     const getStatusStyle = (status) => {
         switch (status) {
-            case 'Planifié': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200';
-            case 'RDV Confirmé': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-200';
+            case 'En attente': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200';
+            case 'En maintenance': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200';
             case 'Terminé': return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200';
             default: return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200';
         }
@@ -191,8 +191,7 @@ const Services = () => {
                                                         className="text-xs border border-slate-200 dark:border-slate-700 rounded px-2 py-1 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
                                                     >
                                                         <option>En attente</option>
-                                                        <option>Planifié</option>
-                                                        <option>RDV Confirmé</option>
+                                                        <option>En maintenance</option>
                                                         <option>Terminé</option>
                                                     </select>
                                                 </td>

@@ -46,7 +46,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <Link to="/" style={{ textDecoration: "none" }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "#0a0a0a", letterSpacing: "0.06em" }}>JNAYEH</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: "#0a0a0a", letterSpacing: "0.06em" }}>BMZ</span>
             <span style={{ fontSize: 12, color: "#bbb", marginLeft: 8 }}>LOCATION</span>
           </Link>
         </div>

@@ -32,7 +32,7 @@ export default function RegisterPage() {
       <div style={{ width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <Link to="/" style={{ textDecoration: "none" }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "#0a0a0a", letterSpacing: "0.06em" }}>JNAYEH</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: "#0a0a0a", letterSpacing: "0.06em" }}>BMZ</span>
             <span style={{ fontSize: 12, color: "#bbb", marginLeft: 8 }}>LOCATION</span>
           </Link>
         </div>
@@ -46,7 +46,7 @@ export default function RegisterPage() {
             margin: "0 0 6px", letterSpacing: "-0.02em",
           }}>Create account</h1>
           <p style={{ color: "#aaa", fontSize: 13, margin: "0 0 28px" }}>
-            Join Jnayeh Fleet Rental
+            Join BMZ Fleet Rental
           </p>
 
           <form onSubmit={handleSubmit}>

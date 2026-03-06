@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell, Legend, RadarChart, Radar,
   PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
-import { getDashboardStats, getFinancialStats, getTopCars } from './api/report.service';
+import { getDashboardStats, getFinancialStats, getTopCars, getMonthlyHistory } from './api/report.service';
 import api from '../../config/api.config';
 
 // ── Colour tokens ────────────────────────────────────────────
@@ -58,17 +58,7 @@ const generateInsight = (stats, financial) => {
   return `⚠️ Taux d'occupation bas (${rate}%) — activez des promotions ciblées pour booster la demande.`;
 };
 
-// ── Fake monthly revenue data (merge with real when available) ─
-const buildMonthlyData = (currentRevenue) => {
-  const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-  const now = new Date();
-  const cur = now.getMonth();
-  return months.map((m, i) => {
-    const factor = 0.6 + Math.sin(i * 0.9) * 0.3 + Math.random() * 0.1;
-    const rev = i === cur ? (currentRevenue || 0) : Math.round(20000 + factor * 35000);
-    return { month: m, revenue: rev, locations: Math.round(rev / 350), isCurrent: i === cur };
-  });
-};
+// Removed Fake monthly revenue logic
 
 // ── Donut chart colours ───────────────────────────────────────
 const PIE_COLORS = [C.primary, C.accent, C.success, C.warning, C.danger];
@@ -157,8 +147,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [financial, setFinancial] = useState(null);
   const [topCars, setTopCars] = useState([]);
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [monthlyData, setMonthlyData] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
 
   // Real AI Insights states
@@ -170,15 +160,21 @@ export default function Dashboard() {
     injectDashStyles();
     (async () => {
       try {
-        const [sRes, fRes, tRes] = await Promise.all([
-          getDashboardStats(), getFinancialStats(), getTopCars()
+        const [st, fin, cars, hist] = await Promise.all([
+          getDashboardStats().then(r => r.data).catch(() => null),
+          getFinancialStats().then(r => r.data).catch(() => null),
+          getTopCars().then(r => r.data).catch(() => []),
+          getMonthlyHistory().then(r => r.data).catch(() => [])
         ]);
-        setStats(sRes.data);
-        setFinancial(fRes.data);
-        setTopCars(tRes.data || []);
-        setMonthlyData(buildMonthlyData(fRes.data?.current_month_revenue));
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
+        setStats(st);
+        setFinancial(fin);
+        setTopCars(cars);
+        setHistory(hist);
+      } catch (err) {
+        console.error("Failed to fetch dashboard data:", err);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -323,29 +319,33 @@ export default function Dashboard() {
                     <div style={{ fontSize: 15, fontWeight: 700 }}>Évolution des Revenus</div>
                     <div style={{ fontSize: 12, color: C.muted }}>12 derniers mois</div>
                   </div>
-                  <ResponsiveContainer width="100%" height={240}>
-                    <AreaChart data={monthlyData}>
-                      <defs>
-                        <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={C.primary} stopOpacity={0.3} />
-                          <stop offset="95%" stopColor={C.primary} stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
-                      <XAxis dataKey="month" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false}
-                        tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="revenue" name="Revenus"
-                        stroke={C.primary} fill="url(#revGrad)" strokeWidth={2.5}
-                        dot={(props) => {
-                          const { payload, cx, cy } = props;
-                          if (payload.isCurrent) return <circle key="cur" cx={cx} cy={cy} r={5} fill={C.accent} stroke="#fff" strokeWidth={2} />;
-                          return <circle key="dot" cx={cx} cy={cy} r={3} fill={C.primary} />;
-                        }}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  {history && history.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <AreaChart data={history}>
+                        <defs>
+                          <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={C.primary} stopOpacity={0.3} />
+                            <stop offset="95%" stopColor={C.primary} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+                        <XAxis dataKey="month_label" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false}
+                          tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area type="monotone" dataKey="revenue" name="Revenus"
+                          stroke={C.primary} fill="url(#revGrad)" strokeWidth={2.5}
+                          dot={(props) => {
+                            const { payload, cx, cy } = props;
+                            if (payload.isCurrent) return <circle key="cur" cx={cx} cy={cy} r={5} fill={C.accent} stroke="#fff" strokeWidth={2} />;
+                            return <circle key="dot" cx={cx} cy={cy} r={3} fill={C.primary} />;
+                          }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div style={{ color: C.muted, fontSize: 13, textAlign: 'center', paddingTop: 40 }}>Aucune donnée d'historique</div>
+                  )}
                 </div>
 
                 {/* Top Cars Pie */}
@@ -397,19 +397,34 @@ export default function Dashboard() {
                   <div style={{ marginBottom: 20 }}>
                     <div style={{ fontSize: 15, fontWeight: 700 }}>Revenus & Locations par Mois</div>
                   </div>
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={monthlyData} barGap={4}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-                      <XAxis dataKey="month" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis yAxisId="rev" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false}
-                        tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-                      <YAxis yAxisId="loc" orientation="right" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend wrapperStyle={{ color: C.muted, fontSize: 12 }} />
-                      <Bar yAxisId="rev" dataKey="revenue" name="Revenus (DT)" fill={C.primary} radius={[6, 6, 0, 0]} maxBarSize={36} />
-                      <Bar yAxisId="loc" dataKey="locations" name="Locations" fill={C.accent} radius={[6, 6, 0, 0]} maxBarSize={24} opacity={0.75} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {history && history.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={280}>
+                      <BarChart data={history} barGap={4}
+                        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                      >
+                        <defs>
+                          <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={C.primary} stopOpacity={0.8} />
+                            <stop offset="95%" stopColor={C.primary} stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="colorLoc" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={C.accent} stopOpacity={0.8} />
+                            <stop offset="95%" stopColor={C.accent} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+                        <XAxis dataKey="month_label" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis yAxisId="left" tick={{ fill: C.muted, fontSize: 11 }} tickFormatter={v => `${v / 1000}k`} axisLine={false} tickLine={false} />
+                        <YAxis yAxisId="right" orientation="right" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend wrapperStyle={{ color: C.muted, fontSize: 12 }} />
+                        <Bar yAxisId="left" dataKey="revenue" name="Revenus (DT)" fill={C.primary} radius={[4, 4, 0, 0]} barSize={20} />
+                        <Bar yAxisId="right" dataKey="payment_count" name="Locations" fill={C.accent} radius={[4, 4, 0, 0]} barSize={20} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div style={{ color: C.muted, fontSize: 13, textAlign: 'center', paddingTop: 40 }}>Aucune donnée d'historique</div>
+                  )}
                 </div>
 
                 {/* Financial summary cards */}

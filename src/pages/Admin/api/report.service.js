@@ -20,3 +20,10 @@ export const getFinancialStats = async () => {
 export const getTopCars = async () => {
     return await api.get('/dashboard/top-cars');
 };
+
+/**
+ * Historique mensuel
+ */
+export const getMonthlyHistory = async () => {
+    return await api.get('/dashboard/history');
+};

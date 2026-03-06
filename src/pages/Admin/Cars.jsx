@@ -197,14 +197,6 @@ export default function Cars() {
               className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block pl-10 p-2.5 transition-colors"
             />
           </div>
-          <div className="flex gap-2">
-            {FILTERS.map(f => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${filter === f ? 'bg-slate-900 text-white' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100'}`}>
-                {f}
-              </button>
-            ))}
-          </div>
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
             className="bg-slate-50 border border-slate-200 text-slate-700 font-medium text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block p-2.5 cursor-pointer">
             <option value="id">Tri : ID</option>
