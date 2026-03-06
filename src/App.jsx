@@ -1,41 +1,35 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import DashboardLayout from './shared/components/layout/DashboardLayout';
-import Dashboard from './pages/Admin/Dashboard';
-import Cars from './pages/Admin/Cars';
-import Clients from './pages/Admin/Clients';
-import ClientDetail from './pages/Admin/ClientDetail';
-import ClientRating from './pages/Admin/ClientRating';
-import Contracts from './pages/Admin/Contracts';
-import Invoices from './pages/Admin/Invoices';
-import Services from './pages/Admin/Services';
-import MonthlyReports from './pages/Admin/MonthlyReports';
-import ReportsExport from './pages/Admin/ReportsExport';
-import PerformanceReportsForecasts from './pages/Admin/PerformanceReportsForecasts';
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 
 function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+  const [count, setCount] = useState(0)
 
-        {/* Admin Routes with DashboardLayout */}
-        <Route path="/admin" element={<DashboardLayout />}>
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="cars" element={<Cars />} />
-          <Route path="clients" element={<Clients />} />
-          <Route path="clients/:id" element={<ClientDetail />} />
-          <Route path="clients/rating/:id" element={<ClientRating />} />
-          <Route path="contracts" element={<Contracts />} />
-          <Route path="invoices" element={<Invoices />} />
-          <Route path="services" element={<Services />} />
-          <Route path="reports" element={<MonthlyReports />} />
-          <Route path="reports/export" element={<ReportsExport />} />
-          <Route path="reports/forecasts" element={<PerformanceReportsForecasts />} />
-          {/* Add more admin routes here as we build them */}
-        </Route>
-      </Routes>
-    </Router>
-  );
+  return (
+    <>
+      <div>
+        <a href="https://vite.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+        <p>
+          Edit <code>src/App.jsx</code> and save to test HMR
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+    </>
+  )
 }
 
-export default App;
+export default App

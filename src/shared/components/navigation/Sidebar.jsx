@@ -84,6 +84,17 @@ const Sidebar = () => {
                         <span className="text-sm font-medium">Clients</span>
                     </NavLink>
 
+                    <NavLink
+                        to="/admin/reviews"
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
+                            }`
+                        }
+                    >
+                        <span className="material-symbols-outlined">star_rate</span>
+                        <span className="text-sm font-medium">Avis & IA</span>
+                    </NavLink>
+
                     <div className="pt-2 mt-2 border-t border-slate-custom-800">
                         <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Rapports</p>
                         <NavLink
