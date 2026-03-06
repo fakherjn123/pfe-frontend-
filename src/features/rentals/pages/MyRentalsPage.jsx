@@ -5,10 +5,10 @@ import { getMyRentals, cancelRental } from "../api/rental.service";
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
 
 const STATUS = {
-  confirmed:        { color: "#0ea5e9", bg: "#f0f9ff", label: "Confirmed" },
-  ongoing:          { color: "#22c55e", bg: "#f0fdf4", label: "Ongoing" },
-  completed:        { color: "#aaa",    bg: "#fafafa", label: "Completed" },
-  cancelled:        { color: "#f87171", bg: "#fff5f5", label: "Cancelled" },
+  confirmed: { color: "#0ea5e9", bg: "#f0f9ff", label: "Confirmed" },
+  ongoing: { color: "#22c55e", bg: "#f0fdf4", label: "Ongoing" },
+  completed: { color: "#aaa", bg: "#fafafa", label: "Completed" },
+  cancelled: { color: "#f87171", bg: "#fff5f5", label: "Cancelled" },
   awaiting_payment: { color: "#f59e0b", bg: "#fffbeb", label: "Payment required" },
 };
 
@@ -57,7 +57,7 @@ export default function MyRentalsPage() {
             padding: "60px", textAlign: "center",
           }}>
             <p style={{ color: "#ccc", fontSize: 14, margin: "0 0 16px" }}>No bookings yet.</p>
-            <a href="/" style={{ color: "#0a0a0a", fontSize: 13, fontWeight: 600 }}>Browse fleet →</a>
+            <button onClick={() => navigate("/")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "#0a0a0a", fontSize: 13, fontWeight: 600 }}>Browse fleet →</button>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -114,10 +114,11 @@ export default function MyRentalsPage() {
                       }}>Cancel</button>
                     )}
                     {rental.status === "completed" && (
-                      <a href="/facture" style={{
-                        color: "#666", fontSize: 12, fontWeight: 500,
-                        textDecoration: "none",
-                      }}>View invoice →</a>
+                      <button onClick={() => navigate("/facture")} style={{
+                        background: "none", border: "none", color: "#666",
+                        fontSize: 12, fontWeight: 500, cursor: "pointer",
+                        padding: 0
+                      }}>View invoice →</button>
                     )}
                   </div>
                 </div>

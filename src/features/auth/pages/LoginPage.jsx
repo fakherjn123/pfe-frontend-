@@ -19,20 +19,23 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    await login({ email, password });
-    navigate("/"); // redirect فقط
-  } catch (err) {
-    if (err.response?.status === 401) {
-      setError("Invalid email or password");
-    } else {
-      setError("Server error");
+    try {
+      await login(form); // Uses form.email and form.password
+      navigate("/"); // redirect فقط
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError("Invalid email or password");
+      } else {
+        setError("Server error");
+      }
+    } finally {
+      setLoading(false);
     }
-  }
-};
+  };
   return (
     <div style={{
       minHeight: "100vh", background: "#fafafa", fontFamily: sans,

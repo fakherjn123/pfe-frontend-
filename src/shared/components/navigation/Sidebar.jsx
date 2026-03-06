@@ -1,154 +1,190 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 
-const Sidebar = () => {
-    return (
-        <aside className="w-64 border-r border-primary/20 bg-slate-900 dark:bg-slate-900 flex flex-col shrink-0 min-h-screen">
-            <div className="p-6 flex flex-col gap-8 h-full">
-                {/* Logo/Brand */}
-                <div className="flex items-center gap-3">
-                    <div className="bg-primary rounded-lg p-2 text-white">
-                        <span className="material-symbols-outlined">directions_car</span>
-                    </div>
-                    <div className="flex flex-col">
-                        <h1 className="text-white text-base font-bold leading-none">AutoGestion</h1>
-                        <p className="text-slate-custom-600 text-xs font-medium">Admin Pro</p>
-                    </div>
-                </div>
+const NAV = [
+  { to: '/admin/dashboard', icon: 'grid_view',    label: 'Dashboard' },
+  { to: '/admin/cars',      icon: 'garage',        label: 'Flotte' },
+  { to: '/admin/contracts', icon: 'description',   label: 'Contrats' },
+  { to: '/admin/invoices',  icon: 'receipt_long',  label: 'Factures' },
+  { to: '/admin/services',  icon: 'build_circle',  label: 'Maintenance' },
+  { to: '/admin/clients',   icon: 'group',         label: 'Clients' },
+];
 
-                {/* Nav Links */}
-                <nav className="flex flex-col gap-1 flex-1">
-                    <NavLink
-                        to="/admin/dashboard"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                            }`
-                        }
-                    >
-                        <span className="material-symbols-outlined">dashboard</span>
-                        <span className="text-sm font-medium">Tableau de bord</span>
-                    </NavLink>
+const REPORTS = [
+  { to: '/admin/reports',           icon: 'bar_chart',      label: 'Performance' },
+  { to: '/admin/reports/export',    icon: 'picture_as_pdf', label: 'Export PDF' },
+  { to: '/admin/reports/forecasts', icon: 'trending_up',    label: 'Prévisions' },
+];
 
-                    <NavLink
-                        to="/admin/cars"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                            }`
-                        }
-                    >
-                        <span className="material-symbols-outlined">garage</span>
-                        <span className="text-sm font-medium">Flotte</span>
-                    </NavLink>
+export default function Sidebar() {
+  const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
 
-                    <NavLink
-                        to="/admin/contracts"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                            }`
-                        }
-                    >
-                        <span className="material-symbols-outlined">description</span>
-                        <span className="text-sm font-medium">Contrats</span>
-                    </NavLink>
+  const linkClass = ({ isActive }) => [
+    'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden',
+    isActive
+      ? 'bg-gradient-to-r from-indigo-500/20 to-cyan-500/10 text-white border border-indigo-500/30'
+      : 'text-slate-500 hover:text-slate-200 hover:bg-white/5',
+  ].join(' ');
 
-                    <NavLink
-                        to="/admin/invoices"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                            }`
-                        }
-                    >
-                        <span className="material-symbols-outlined">receipt_long</span>
-                        <span className="text-sm font-medium">Factures</span>
-                    </NavLink>
+  return (
+    <aside
+      className="relative flex flex-col shrink-0 min-h-screen transition-all duration-300"
+      style={{
+        width: collapsed ? 72 : 256,
+        background: 'linear-gradient(180deg, #0a0f1e 0%, #0d1117 100%)',
+        borderRight: '1px solid rgba(255,255,255,0.06)',
+      }}
+    >
+      {/* Ambient glow */}
+      <div style={{
+        position: 'absolute', top: -60, left: -40,
+        width: 180, height: 180, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(99,102,241,0.15), transparent)',
+        pointerEvents: 'none',
+      }} />
 
-                    <NavLink
-                        to="/admin/services"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                            }`
-                        }
-                    >
-                        <span className="material-symbols-outlined">build</span>
-                        <span className="text-sm font-medium">Services</span>
-                    </NavLink>
+      <div className="flex flex-col h-full p-4 gap-6">
 
-                    <NavLink
-                        to="/admin/clients"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                            }`
-                        }
-                    >
-                        <span className="material-symbols-outlined">group</span>
-                        <span className="text-sm font-medium">Clients</span>
-                    </NavLink>
-
-                    <NavLink
-                        to="/admin/reviews"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                            }`
-                        }
-                    >
-                        <span className="material-symbols-outlined">star_rate</span>
-                        <span className="text-sm font-medium">Avis & IA</span>
-                    </NavLink>
-
-                    <div className="pt-2 mt-2 border-t border-slate-custom-800">
-                        <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Rapports</p>
-                        <NavLink
-                            to="/admin/reports"
-                            end
-                            className={({ isActive }) =>
-                                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                                }`
-                            }
-                        >
-                            <span className="material-symbols-outlined">bar_chart</span>
-                            <span className="text-sm font-medium">Mensuels</span>
-                        </NavLink>
-
-                        <NavLink
-                            to="/admin/reports/export"
-                            className={({ isActive }) =>
-                                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                                }`
-                            }
-                        >
-                            <span className="material-symbols-outlined">picture_as_pdf</span>
-                            <span className="text-sm font-medium">Export PDF</span>
-                        </NavLink>
-
-                        <NavLink
-                            to="/admin/reports/forecasts"
-                            className={({ isActive }) =>
-                                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'text-slate-custom-600 hover:bg-primary/10 hover:text-white'
-                                }`
-                            }
-                        >
-                            <span className="material-symbols-outlined">trending_up</span>
-                            <span className="text-sm font-medium">Prévisions</span>
-                        </NavLink>
-                    </div>
-                </nav>
-
-                {/* User Profile */}
-                <div className="mt-auto pt-6 border-t border-slate-custom-800">
-                    <div className="flex items-center gap-3">
-                        <div
-                            className="w-10 h-10 rounded-full bg-primary/20 bg-cover bg-center shrink-0"
-                            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCUKsugI-YX30fcfti6Kv2ie-i9gFZBaA7DfKZPY09hp33yMyrdxwuQz-JzjRJ8WcDYrBeXTf-4OYchEurjP-63JvNk3naECP_MTefP1zwQZew2FyNe6ycw3hABuLXcg_8IJpp2lL562NY-HXdhN2dk1PjVuD-dpXelwiKmo6LHS53qh1DeuV6E-zJJnaBYsX3FXCtSWTD1nhnRDwlwH5eS5ZJxqGLGOEouZQmXsOQtxTr5CKaC80fjg4ubgg2D5wUbPrUdMXL_-BjI')" }}
-                        ></div>
-                        <div className="flex flex-col overflow-hidden">
-                            <span className="text-white text-sm font-medium truncate">Marc Lefebvre</span>
-                            <span className="text-slate-custom-600 text-xs truncate">Manager</span>
-                        </div>
-                    </div>
-                </div>
+        {/* Brand + collapse toggle */}
+        <div className="flex items-center justify-between pt-2">
+          {!collapsed && (
+            <div className="flex items-center gap-3">
+              <div style={{
+                width: 36, height: 36, borderRadius: 10,
+                background: 'linear-gradient(135deg, #6366f1, #22d3ee)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <span className="material-symbols-outlined text-white text-xl">directions_car</span>
+              </div>
+              <div>
+                <div className="text-white text-sm font-black tracking-tight leading-none">BMZ</div>
+                <div className="text-slate-500 text-[10px] font-medium tracking-widest">LOCATION</div>
+              </div>
             </div>
-        </aside>
-    );
-};
+          )}
+          {collapsed && (
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: 'linear-gradient(135deg, #6366f1, #22d3ee)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto',
+            }}>
+              <span className="material-symbols-outlined text-white text-xl">directions_car</span>
+            </div>
+          )}
+          {!collapsed && (
+            <button
+              onClick={() => setCollapsed(true)}
+              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-300 hover:bg-white/5 transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">chevron_left</span>
+            </button>
+          )}
+        </div>
 
-export default Sidebar;
+        {collapsed && (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="flex justify-center p-1.5 rounded-lg text-slate-600 hover:text-slate-300 hover:bg-white/5 transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">chevron_right</span>
+          </button>
+        )}
+
+        {/* Main Nav */}
+        <nav className="flex flex-col gap-1 flex-1">
+          {!collapsed && (
+            <div className="px-3 mb-1">
+              <span className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.15em]">Navigation</span>
+            </div>
+          )}
+
+          {NAV.map(({ to, icon, label }) => (
+            <NavLink key={to} to={to} className={linkClass} title={collapsed ? label : undefined}>
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <div style={{
+                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                      width: 3, height: '60%', borderRadius: '0 4px 4px 0',
+                      background: 'linear-gradient(180deg,#6366f1,#22d3ee)',
+                    }} />
+                  )}
+                  <span
+                    className="material-symbols-outlined text-xl shrink-0 transition-colors"
+                    style={{ color: isActive ? '#818cf8' : undefined }}
+                  >{icon}</span>
+                  {!collapsed && (
+                    <span className="text-sm font-medium">{label}</span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
+
+          {/* Reports section */}
+          <div className={`${collapsed ? 'mt-4' : 'mt-4 pt-4'} border-t border-white/5`}>
+            {!collapsed && (
+              <div className="px-3 mb-1">
+                <span className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.15em]">Rapports IA</span>
+              </div>
+            )}
+            {REPORTS.map(({ to, icon, label }) => (
+              <NavLink key={to} to={to} end={to === '/admin/reports'} className={linkClass} title={collapsed ? label : undefined}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <div style={{
+                        position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                        width: 3, height: '60%', borderRadius: '0 4px 4px 0',
+                        background: 'linear-gradient(180deg,#6366f1,#22d3ee)',
+                      }} />
+                    )}
+                    <span
+                      className="material-symbols-outlined text-xl shrink-0"
+                      style={{ color: isActive ? '#818cf8' : undefined }}
+                    >{icon}</span>
+                    {!collapsed && <span className="text-sm font-medium">{label}</span>}
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+
+        {/* AI Feature badge */}
+        {!collapsed && (
+          <div style={{
+            background: 'linear-gradient(135deg,rgba(99,102,241,0.12),rgba(34,211,238,0.08))',
+            border: '1px solid rgba(99,102,241,0.2)',
+            borderRadius: 12, padding: '12px 14px',
+          }}>
+            <div style={{ fontSize: 10, color: '#818cf8', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
+              ✨ FONCTIONS IA ACTIVES
+            </div>
+            <div style={{ fontSize: 11, color: '#475569', lineHeight: 1.5 }}>
+              Auto-réponse avis · Annonces voitures · Dashboard intelligent
+            </div>
+          </div>
+        )}
+
+        {/* User */}
+        <div className={`pt-4 border-t border-white/5 flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
+          <div style={{
+            width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+            background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontSize: 13, fontWeight: 800,
+          }}>A</div>
+          {!collapsed && (
+            <div className="overflow-hidden">
+              <div className="text-white text-sm font-semibold truncate">Admin</div>
+              <div className="text-slate-600 text-xs">Manager</div>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </aside>
+  );
+}
