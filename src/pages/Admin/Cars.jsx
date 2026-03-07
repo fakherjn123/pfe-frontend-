@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../../config/api.config';
 import { generateCarDescription } from '../../features/reviews/api/ai.service';
 
-const EMPTY_FORM = { id: null, brand: '', model: '', price_per_day: '', status: 'available', image: null, existingImage: null, description: '' };
+const EMPTY_FORM = { id: null, brand: '', model: '', price_per_day: '', status: 'available', image: null, existingImage: null, description: '', fuel_type: 'Essence', transmission: 'Manuelle' };
 const FILTERS = ['Tous', 'Disponible', 'Loué', 'Maintenance'];
 
 const getStatus = (car) => {
@@ -46,7 +46,7 @@ export default function Cars() {
     setForm({
       id: car.id, brand: car.brand, model: car.model, price_per_day: car.price_per_day,
       status: car.available ? 'available' : 'unavailable', image: null, existingImage: car.image,
-      description: car.description || ''
+      description: car.description || '', fuel_type: car.fuel_type || 'Essence', transmission: car.transmission || 'Manuelle'
     });
     setPreview(car.image ? `http://localhost:3000${car.image}` : null);
     setModal(true);
@@ -62,6 +62,8 @@ export default function Cars() {
       fd.append('price_per_day', form.price_per_day);
       if (form.description) fd.append('description', form.description);
       fd.append('status', form.status);
+      fd.append('fuel_type', form.fuel_type);
+      fd.append('transmission', form.transmission);
       if (form.image instanceof File) fd.append('image', form.image);
 
       if (isEdit) {
@@ -239,7 +241,15 @@ export default function Cars() {
                       <div className="font-black text-slate-900 truncate text-lg">
                         {car.brand} <span className="font-normal text-slate-500">{car.model}</span>
                       </div>
-                      <div className="text-slate-400 text-xs mt-1 font-mono">#{String(car.id).padStart(4, '0')}</div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="text-slate-400 text-xs font-mono">#{String(car.id).padStart(4, '0')}</div>
+                        <div className="text-slate-500 text-xs flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded-md">
+                          <span>⛽</span> {car.fuel_type || 'Essence'}
+                        </div>
+                        <div className="text-slate-500 text-xs flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded-md">
+                          <span>⚙️</span> {car.transmission || 'Manuelle'}
+                        </div>
+                      </div>
                     </div>
                     <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${st.bg} ${st.color}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`}></span> {st.label}
@@ -271,7 +281,11 @@ export default function Cars() {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{car.brand}</div>
-                        <div className="font-black text-slate-900 text-xl truncate pr-2">{car.model}</div>
+                        <div className="font-black text-slate-900 text-xl truncate pr-2 leading-tight">{car.model}</div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full flex items-center gap-1">⛽ {car.fuel_type || 'Essence'}</span>
+                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full flex items-center gap-1">⚙️ {car.transmission || 'Manuelle'}</span>
+                        </div>
                       </div>
                       <div className="text-right">
                         <div className="font-black text-primary-600 text-2xl">{car.price_per_day}</div>
@@ -332,6 +346,25 @@ export default function Cars() {
                   <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-primary-500 focus:border-primary-500 font-medium text-sm transition-colors cursor-pointer">
                     <option value="available">✅ Disponible</option>
                     <option value="unavailable">❌ Indisponible</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Carburant</label>
+                  <select value={form.fuel_type} onChange={e => setForm({ ...form, fuel_type: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-primary-500 focus:border-primary-500 font-medium text-sm transition-colors cursor-pointer">
+                    <option value="Essence">Essence</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Hybride">Hybride</option>
+                    <option value="Electrique">Électrique</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Boîte de vitesses</label>
+                  <select value={form.transmission} onChange={e => setForm({ ...form, transmission: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-primary-500 focus:border-primary-500 font-medium text-sm transition-colors cursor-pointer">
+                    <option value="Manuelle">Manuelle</option>
+                    <option value="Automatique">Automatique</option>
                   </select>
                 </div>
               </div>
