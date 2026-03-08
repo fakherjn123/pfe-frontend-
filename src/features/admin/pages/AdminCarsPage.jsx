@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import api from '../../config/api.config';
-import { generateCarDescription } from '../../features/reviews/api/ai.service';
+import { Car, CheckCircle, XCircle, DollarSign, Search, LayoutGrid, List, Fuel, Settings, Edit2, Trash2, Camera, Sparkles, AlertTriangle } from 'lucide-react';
+import api from '../../../config/api.config';
+import { generateCarDescription } from '../../reviews/api/ai.service';
 
 const EMPTY_FORM = { id: null, brand: '', model: '', price_per_day: '', status: 'available', image: null, existingImage: null, description: '', fuel_type: 'Essence', transmission: 'Manuelle' };
 const FILTERS = ['Tous', 'Disponible', 'Loué', 'Maintenance'];
@@ -160,28 +161,28 @@ export default function Cars() {
         {/* KPI Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl">🚗</div>
+            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl"><Car className="w-6 h-6 inline-block" /></div>
             <div>
               <div className="text-xs font-bold text-slate-400 uppercase">Total Flotte</div>
               <div className="text-2xl font-black text-slate-900">{cars.length}</div>
             </div>
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-2xl">✅</div>
+            <div className="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-2xl"><CheckCircle className="w-6 h-6 inline-block" /></div>
             <div>
               <div className="text-xs font-bold text-slate-400 uppercase">Disponibles</div>
               <div className="text-2xl font-black text-slate-900">{totalAvailable}</div>
             </div>
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-2xl">🔴</div>
+            <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-2xl"><XCircle className="w-6 h-6 inline-block" /></div>
             <div>
               <div className="text-xs font-bold text-slate-400 uppercase">Indisponibles</div>
               <div className="text-2xl font-black text-slate-900">{totalUnavailable}</div>
             </div>
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">💰</div>
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl"><DollarSign className="w-6 h-6 inline-block" /></div>
             <div>
               <div className="text-xs font-bold text-slate-400 uppercase">Prix Moyen/Jour</div>
               <div className="text-2xl font-black text-slate-900">{avgPrice} DT</div>
@@ -192,7 +193,7 @@ export default function Cars() {
         {/* Controls Bar */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
           <div className="flex-1 min-w-[200px] relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Search className="w-5 h-5" /></span>
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher marque ou modèle..."
@@ -207,8 +208,8 @@ export default function Cars() {
             <option value="price_desc">Prix décroissant</option>
           </select>
           <div className="flex bg-slate-50 rounded-xl border border-slate-200 p-1">
-            <button onClick={() => setViewMode('grid')} className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm font-bold text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>⊞</button>
-            <button onClick={() => setViewMode('list')} className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm font-bold text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>☰</button>
+            <button onClick={() => setViewMode('grid')} className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm font-bold text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}><LayoutGrid className="w-5 h-5" /></button>
+            <button onClick={() => setViewMode('list')} className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm font-bold text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}><List className="w-5 h-5" /></button>
           </div>
         </div>
 
@@ -219,7 +220,7 @@ export default function Cars() {
           </div>
         ) : visible.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center shadow-sm">
-            <div className="text-5xl mb-4">🚗</div>
+            <div className="text-5xl mb-4"><Car className="w-6 h-6 inline-block" /></div>
             <h3 className="text-xl font-bold text-slate-900 mb-2">Aucun véhicule trouvé</h3>
             <p className="text-slate-500 mb-6">{search ? `Aucun résultat pour "${search}"` : "Ajoutez votre premier véhicule"}</p>
             <button onClick={openAdd} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors">
@@ -235,7 +236,7 @@ export default function Cars() {
                 return (
                   <div key={car.id} className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="w-24 h-16 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0 flex items-center justify-center text-3xl">
-                      {imgSrc ? <img src={imgSrc} alt="car" className="w-full h-full object-cover" /> : '🚗'}
+                      {imgSrc ? <img src={imgSrc} alt="car" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Non+Disponible"; }} /> : '<Car className="w-5 h-5 inline-block" />'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-black text-slate-900 truncate text-lg">
@@ -244,10 +245,10 @@ export default function Cars() {
                       <div className="flex items-center gap-2 mt-1">
                         <div className="text-slate-400 text-xs font-mono">#{String(car.id).padStart(4, '0')}</div>
                         <div className="text-slate-500 text-xs flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded-md">
-                          <span>⛽</span> {car.fuel_type || 'Essence'}
+                          <Fuel className="w-3 h-3 inline-block" /> {car.fuel_type || 'Essence'}
                         </div>
                         <div className="text-slate-500 text-xs flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded-md">
-                          <span>⚙️</span> {car.transmission || 'Manuelle'}
+                          <Settings className="w-3 h-3 inline-block" /> {car.transmission || 'Manuelle'}
                         </div>
                       </div>
                     </div>
@@ -268,9 +269,9 @@ export default function Cars() {
                 <div key={car.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all group hover:-translate-y-1">
                   <div className="h-48 bg-slate-100 relative overflow-hidden flex items-center justify-center">
                     {imgSrc ? (
-                      <img src={imgSrc} alt="car" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={imgSrc} alt="car" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Non+Disponible"; }} />
                     ) : (
-                      <span className="text-6xl opacity-30">🚗</span>
+                      <span className="text-6xl opacity-30"><Car className="w-6 h-6 inline-block" /></span>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-60"></div>
                     <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 bg-white shadow-sm ${st.color}`}>
@@ -283,8 +284,8 @@ export default function Cars() {
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{car.brand}</div>
                         <div className="font-black text-slate-900 text-xl truncate pr-2 leading-tight">{car.model}</div>
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full flex items-center gap-1">⛽ {car.fuel_type || 'Essence'}</span>
-                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full flex items-center gap-1">⚙️ {car.transmission || 'Manuelle'}</span>
+                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full flex items-center gap-1"> {car.fuel_type || 'Essence'}</span>
+                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full flex items-center gap-1"> {car.transmission || 'Manuelle'}</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -294,10 +295,10 @@ export default function Cars() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100">
                       <button onClick={() => openEdit(car)} className="py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-sm font-bold transition-colors border border-slate-200 flex items-center justify-center gap-2">
-                        ✏️ Éditer
+                        <Edit2 className="w-4 h-4 inline" /> Éditer
                       </button>
                       <button onClick={() => setDeleteId(car.id)} className="py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-bold transition-colors border border-red-100 flex items-center justify-center gap-2">
-                        🗑️ Sup
+                        <Trash2 className="w-4 h-4 inline" /> Sup
                       </button>
                     </div>
                   </div>
@@ -323,7 +324,7 @@ export default function Cars() {
                 <h3 className="font-black text-xl text-slate-900">{isEdit ? 'Modifier Véhicule' : 'Nouveau Véhicule'}</h3>
                 <p className="text-xs text-slate-500 mt-1 font-medium">{isEdit ? 'Mettre à jour les infos' : 'Ajouter à la flotte de location'}</p>
               </div>
-              <button onClick={() => setModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 transition-colors">✕</button>
+              <button onClick={() => setModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 transition-colors"><XCircle className="w-4 h-4" /></button>
             </div>
             <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
               <div className="grid grid-cols-2 gap-4">
@@ -344,8 +345,8 @@ export default function Cars() {
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Statut</label>
                   <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-primary-500 focus:border-primary-500 font-medium text-sm transition-colors cursor-pointer">
-                    <option value="available">✅ Disponible</option>
-                    <option value="unavailable">❌ Indisponible</option>
+                    <option value="available"><CheckCircle className="w-6 h-6 inline-block" /> Disponible</option>
+                    <option value="unavailable">Indisponible</option>
                   </select>
                 </div>
               </div>
@@ -373,10 +374,10 @@ export default function Cars() {
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Photo</label>
                 <div onClick={() => fileRef.current?.click()} className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors ${preview ? 'border-indigo-200 bg-indigo-50/30' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'}`}>
                   {preview ? (
-                    <img src={preview} alt="preview" className="h-32 w-full object-contain rounded-lg" />
+                    <img src={preview} alt="preview" className="h-32 w-full object-contain rounded-lg" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Non+Disponible"; }} />
                   ) : (
                     <div className="flex flex-col items-center text-slate-400">
-                      <span className="text-3xl mb-2">📸</span>
+                      <span className="text-3xl mb-2"><Camera className="w-8 h-8 mb-2 mx-auto" /></span>
                       <span className="text-sm font-bold text-slate-600">Cliquez pour ajouter une image</span>
                       <span className="text-xs mt-1">PNG, JPG (Max 5Mo)</span>
                     </div>
@@ -389,8 +390,8 @@ export default function Cars() {
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="block text-xs font-bold text-slate-500 uppercase">Description</label>
                   <button onClick={handleAiGenerate} disabled={aiGenerating || (!form.brand && !form.model)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${aiGenerating ? 'bg-indigo-100 text-indigo-700 cursor-wait' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'}`}>
-                    {aiGenerating ? <span className="w-3 h-3 rounded-full border-2 border-indigo-300 border-t-indigo-600 animate-spin"></span> : '✨'}
-                    {aiGenerating ? 'Génération...' : 'IA Générer'}
+                    {aiGenerating ? <span className="w-3 h-3 rounded-full border-2 border-indigo-300 border-t-indigo-600 animate-spin"></span> : <Sparkles className="w-4 h-4 inline" />}
+                    {aiGenerating ? 'Génération...' : 'Générer avec l\'IA'}
                   </button>
                 </div>
                 <textarea
@@ -417,7 +418,7 @@ export default function Cars() {
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 p-8 text-center border-t-4 border-t-red-500">
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">⚠️</div>
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><AlertTriangle className="w-8 h-8 mx-auto" /></div>
             <h3 className="font-black text-xl text-slate-900 mb-2">Supprimer le véhicule ?</h3>
             <p className="text-sm text-slate-500 font-medium mb-8">Cette action est définitive et supprimera toutes les données liées.</p>
             <div className="flex gap-3">

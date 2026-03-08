@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getClients } from './api/client.service';
+import { getClients } from '../api/client.service';
 
 const Clients = () => {
     const navigate = useNavigate();
@@ -146,27 +146,7 @@ const Clients = () => {
                     </div>
                 </div>
 
-                {/* Summary Cards */}
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-6 rounded-2xl border border-slate-100 bg-white shadow-sm flex items-center justify-between group hover:border-slate-200 transition-colors">
-                        <div>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Clients Inscrits</p>
-                            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{clients.length}</h3>
-                        </div>
-                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-slate-100 transition-colors">
-                            <span className="material-symbols-outlined text-slate-400">group</span>
-                        </div>
-                    </div>
-                    <div className="p-6 rounded-2xl border border-slate-100 bg-white shadow-sm flex items-center justify-between group hover:border-slate-200 transition-colors">
-                        <div>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Résultats Actuels</p>
-                            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{filtered.length}</h3>
-                        </div>
-                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-slate-100 transition-colors">
-                            <span className="material-symbols-outlined text-slate-400">filter_list</span>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     );

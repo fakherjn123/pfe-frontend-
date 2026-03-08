@@ -25,23 +25,23 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
-    { to: "/", label: "Fleet", icon: "🚗" },
+    { to: "/", label: "Fleet" },
     ...(user && user.role !== "admin"
       ? [
-        { to: "/rentals", label: "My Rentals", icon: "📋" },
-        { to: "/facture", label: "Invoices", icon: "📄" },
+        { to: "/rentals", label: "My Rentals" },
+        { to: "/facture", label: "Invoices" },
       ]
       : []),
     ...(user?.role === "admin"
       ? [
-        { to: "/dashboard", label: "Dashboard", icon: "📊" },
-        { to: "/admin/cars", label: "Cars", icon: "🏎️" },
-        { to: "/admin/clients", label: "Clients", icon: "👥" },
-        { to: "/admin/payments", label: "Payments", icon: "💳" },
-        { to: "/admin/rentals", label: "Rentals", icon: "📋" },
-        { to: "/admin/factures", label: "Invoices", icon: "💰" },
-        { to: "/admin/services", label: "Maintenance", icon: "🔧" },
-        { to: "/admin/reviews", label: "Reviews", icon: "⭐" },
+        { to: "/dashboard", label: "Dashboard" },
+        { to: "/admin/cars", label: "Cars" },
+        { to: "/admin/clients", label: "Clients" },
+        { to: "/admin/payments", label: "Payments" },
+        { to: "/admin/rentals", label: "Rentals" },
+        { to: "/admin/factures", label: "Invoices" },
+        { to: "/admin/services", label: "Maintenance" },
+        { to: "/admin/reviews", label: "Reviews" },
       ]
       : []),
   ];

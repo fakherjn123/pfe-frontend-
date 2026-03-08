@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getClientRentals } from './api/client.service';
-import { getAllFactures, downloadFacture } from '../../features/factures/api/facture.service';
-import api from '../../config/api.config';
+import { getClientRentals } from '../api/client.service';
+import { getAllFactures, downloadFacture } from '../../factures/api/facture.service';
+import api from '../../../config/api.config';
 
 const ClientDetail = () => {
     const { id } = useParams();
@@ -203,7 +203,7 @@ const ClientDetail = () => {
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
                                                                 {rental.Car?.image ? (
-                                                                    <img src={rental.Car.image} alt="car" className="w-full h-full object-cover" />
+                                                                    <img src={rental.Car.image ? `http://localhost:3000${rental.Car.image}` : "https://placehold.co/400x400/f1f5f9/94a3b8?text=Photo+Absente"} alt="car" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/400x400/f1f5f9/94a3b8?text=Photo+Absente"; }} />
                                                                 ) : (
                                                                     <span className="material-symbols-outlined text-slate-400">directions_car</span>
                                                                 )}

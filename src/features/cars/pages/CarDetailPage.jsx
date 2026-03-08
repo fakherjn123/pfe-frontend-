@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Sparkles, Tag, Car, DollarSign, BarChart3, Key, MessageSquare, Calendar, Ban } from "lucide-react";
 import api from "../../../config/api.config";
 
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
@@ -205,7 +206,7 @@ export default function CarDetailPage() {
                 background: 'linear-gradient(90deg, #c8a96e, #d4a843, #c8a96e)',
               }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                <span style={{ fontSize: 18 }}>✨</span>
+                <Sparkles className="w-5 h-5 text-indigo-500" />
                 <h2 style={{ color: "#0a0a0a", fontSize: 15, fontWeight: 700, margin: 0 }}>Description</h2>
                 <span style={{
                   fontSize: 9, fontWeight: 700, background: 'rgba(200,169,110,0.12)',
@@ -224,15 +225,15 @@ export default function CarDetailPage() {
             <h2 style={{ color: "#0a0a0a", fontSize: 15, fontWeight: 700, margin: "0 0 20px" }}>Vehicle details</h2>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
               {[
-                { label: "Brand", value: car.brand, icon: '🏷️' },
-                { label: "Model", value: car.model, icon: '🚗' },
-                { label: "Daily rate", value: `${car.price_per_day} TND`, icon: '💰' },
-                { label: "Status", value: car.available ? "Available" : "Not available", icon: '📊' },
-                { label: "Vehicle ID", value: `#${String(car.id).padStart(3, "0")}`, icon: '🔑' },
+                { label: "Brand", value: car.brand, icon: <Tag className="w-4 h-4" /> },
+                { label: "Model", value: car.model, icon: <Car className="w-4 h-4" /> },
+                { label: "Daily rate", value: `${car.price_per_day} TND`, icon: <DollarSign className="w-4 h-4" /> },
+                { label: "Status", value: car.available ? "Available" : "Not available", icon: <BarChart3 className="w-4 h-4" /> },
+                { label: "Vehicle ID", value: `#${String(car.id).padStart(3, "0")}`, icon: <Key className="w-4 h-4" /> },
               ].map(({ label, value, icon }) => (
                 <div key={label} className="spec-item">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 14 }}>{icon}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', color: '#666' }}>{icon}</span>
                     <div>
                       <div style={{ color: "#bbb", fontSize: 11, fontWeight: 500, marginBottom: 3 }}>{label}</div>
                       <div style={{ color: "#0a0a0a", fontSize: 14, fontWeight: 600 }}>{value}</div>
@@ -260,7 +261,7 @@ export default function CarDetailPage() {
 
             {reviews.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '24px 0', color: '#ccc' }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>💬</div>
+                <div style={{ marginBottom: 8 }}><MessageSquare className="w-8 h-8 mx-auto text-slate-300" /></div>
                 <p style={{ fontSize: 13, margin: 0 }}>No reviews yet. Be the first!</p>
               </div>
             ) : (
@@ -409,8 +410,8 @@ export default function CarDetailPage() {
             {/* Unavailable Dates List */}
             {bookedDates.length > 0 && (
               <div style={{ marginTop: 28, borderTop: "1px solid #f0f0f0", paddingTop: 20 }}>
-                <h3 style={{ color: "#0a0a0a", fontSize: 13, fontWeight: 700, margin: "0 0 12px" }}>
-                  Dates déjà réservées 🗓️
+                <h3 style={{ color: "#0a0a0a", fontSize: 13, fontWeight: 700, margin: "0 0 12px", display: 'flex', alignItems: 'center', gap: 6 }}>
+                  Dates déjà réservées <Calendar className="w-4 h-4 text-slate-500" />
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {bookedDates.map((d, i) => (
@@ -419,7 +420,7 @@ export default function CarDetailPage() {
                       padding: "6px 10px", borderRadius: 6, fontWeight: 600,
                       display: "flex", alignItems: "center", gap: 6
                     }}>
-                      <span>🚫</span>
+                      <Ban className="w-4 h-4" />
                       {new Date(d.start).toLocaleDateString("fr-FR")} — {new Date(d.end).toLocaleDateString("fr-FR")}
                     </div>
                   ))}

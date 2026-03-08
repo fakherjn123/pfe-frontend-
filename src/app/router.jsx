@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "../shared/components/navigation/Navbar";
 import ProtectedRoute from "../shared/guards/ProtectedRoute";
-import AdminCarsPage from "../pages/Admin/Cars"; // Use the new page
+import AdminCarsPage from "../features/admin/pages/AdminCarsPage"; // Use the new page
 import CarDetailPage from "../features/cars/pages/CarDetailPage";
 import RegisterPage from "../features/auth/pages/RegisterPage";
 import CarsPage from "../features/cars/pages/CarsPage";
 import LoginPage from "../features/auth/pages/LoginPage";
 import OAuthSuccessPage from "../features/auth/pages/OAuthSuccessPage";
-import DashboardPage from "../pages/Admin/Dashboard"; // Use the main Feature Dashboard
+import DashboardPage from "../features/admin/pages/DashboardPage"; // Use the main Feature Dashboard
 import MyRentalsPage from "../features/rentals/pages/MyRentalsPage";
 import PaymentPage from "../features/payments/pages/PaymentPage";
 import MyFacturesPage from "../features/factures/pages/MyFacturesPage";
@@ -15,10 +15,10 @@ import AllFacturesPage from "../features/admin/pages/AllFacturesPage";
 import AllRentalsPage from "../features/admin/pages/AllRentalsPage";
 import RentalHistoryPage from "../features/admin/pages/RentalHistoryPage";
 import ManagerPaymentsPage from "../features/admin/pages/ManagePaymentsPage";
-import ReviewsPage from "../pages/Admin/Reviews";
-import ClientsPage from "../pages/Admin/Clients";
-import ClientDetail from "../pages/Admin/ClientDetail";
-import ServicesPage from "../pages/Admin/Services";
+import ReviewsPage from "../features/admin/pages/ReviewsPage";
+import ClientsPage from "../features/admin/pages/ClientsPage";
+import ClientDetailPage from "../features/admin/pages/ClientDetailPage";
+import ServicesPage from "../features/admin/pages/ServicesPage";
 
 export default function Router() {
   return (
@@ -75,7 +75,7 @@ export default function Router() {
           <ProtectedRoute role="admin"><ClientsPage /></ProtectedRoute>
         } />
         <Route path="/admin/clients/:id" element={
-          <ProtectedRoute role="admin"><ClientDetail /></ProtectedRoute>
+          <ProtectedRoute role="admin"><ClientDetailPage /></ProtectedRoute>
         } />
 
         {/* FALLBACKS */}

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { Search, DollarSign, Car } from "lucide-react";
 import api from "../../../config/api.config";
 import { Link } from "react-router-dom";
 
@@ -78,8 +79,9 @@ function CarCard({ car, index }) {
         <div style={{ height: 210, background: "#f8f9fa", position: "relative", overflow: 'hidden' }}>
           <img
             className="car-pub-img"
-            src={car.image ? `http://localhost:3000${car.image}` : "/placeholder-car.jpg"}
+            src={car.image ? `http://localhost:3000${car.image}` : "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Non+Disponible"}
             alt={car.brand}
+            onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Non+Disponible"; }}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
           <div style={{
@@ -243,7 +245,7 @@ export default function CarsPage() {
             padding: 8, boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
           }}>
             <div style={{ position: 'relative', flex: 1 }}>
-              <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 16 }}>🔍</span>
+              <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }}><Search size={16} className="text-slate-400" /></span>
               <input
                 placeholder="Search brand (e.g. BMW)"
                 value={filters.brand}
@@ -255,7 +257,7 @@ export default function CarsPage() {
             </div>
             <div style={{ width: 1, height: 28, background: '#f0f0f0' }} />
             <div style={{ position: 'relative', flex: 1 }}>
-              <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 16 }}>💰</span>
+              <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }}><DollarSign size={16} className="text-slate-400" /></span>
               <input
                 type="number"
                 placeholder="Max price (TND)"
@@ -340,7 +342,7 @@ export default function CarsPage() {
             textAlign: 'center', padding: '80px 40px',
             background: '#fff', borderRadius: 18, border: '1px solid #ebebeb',
           }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🚗</div>
+            <div style={{ marginBottom: 12 }}><Car size={48} className="mx-auto text-slate-300" /></div>
             <h3 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 8px' }}>No vehicles found</h3>
             <p style={{ color: "#aaa", fontSize: 14, margin: 0 }}>Try different search criteria.</p>
           </div>

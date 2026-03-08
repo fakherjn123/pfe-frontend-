@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { Flame, CheckCircle, AlertTriangle, Bot, Settings, Car, DollarSign, Key, Users, TrendingUp, Banknote, Calendar, BarChart3, Brain, Sparkles, Lightbulb, Target, Rocket, Shield } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar,
   PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
-import { getDashboardStats, getFinancialStats, getTopCars, getMonthlyHistory } from './api/report.service';
-import api from '../../config/api.config';
+import { getDashboardStats, getFinancialStats, getTopCars, getMonthlyHistory } from '../api/report.service';
+import api from '../../../config/api.config';
 
 // ── Colour tokens ────────────────────────────────────────────
 const C = {
@@ -53,9 +54,9 @@ const generateInsight = (stats, financial) => {
   const rate = stats.active_cars > 0
     ? Math.round((stats.ongoing_rentals / stats.active_cars) * 100)
     : 0;
-  if (rate > 80) return `🔥 Taux d'occupation exceptionnel à ${rate}% — flotte quasi saturée, envisagez une expansion.`;
-  if (rate > 50) return `✅ Performance solide à ${rate}% d'occupation — croissance stable ce mois.`;
-  return `⚠️ Taux d'occupation bas (${rate}%) — activez des promotions ciblées pour booster la demande.`;
+  if (rate > 80) return <><Flame className="w-4 h-4 inline-block mb-1 text-primary-500" /> Taux d'occupation exceptionnel à {rate}% — flotte quasi saturée, envisagez une expansion.</>;
+  if (rate > 50) return <><CheckCircle className="w-4 h-4 inline-block mb-1 text-green-500" /> Performance solide à {rate}% d'occupation — croissance stable ce mois.</>;
+  return <><AlertTriangle className="w-4 h-4 inline-block mb-1 text-amber-500" /> Taux d'occupation bas ({rate}%) — activez des promotions ciblées pour booster la demande.</>;
 };
 
 // Removed Fake monthly revenue logic
@@ -106,41 +107,48 @@ const AnimatedValue = ({ value, suffix = '' }) => {
 };
 
 // ── Stat Card ─────────────────────────────────────────────────
-const StatCard = ({ icon, label, value, sub, trend, color = C.primary, delay = 0 }) => (
-  <div className="kpi-card" style={{
-    background: C.surface, border: `1px solid ${C.border}`,
-    borderRadius: 16, padding: '20px 22px',
-    display: 'flex', flexDirection: 'column', gap: 10,
-    animationDelay: `${delay}s`,
-  }}
-    onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 32px ${color}22`; }}
-    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
-  >
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-      <div style={{
-        width: 44, height: 44, borderRadius: 12,
-        background: `${color}22`, display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        fontSize: 20,
-      }}>{icon}</div>
-      {trend && (
-        <span style={{
-          fontSize: 11, fontWeight: 700, padding: '3px 8px',
-          borderRadius: 20,
-          background: trend > 0 ? '#10b98122' : '#f43f5e22',
-          color: trend > 0 ? C.success : C.danger,
-        }}>
-          {trend > 0 ? '▲' : '▼'} {Math.abs(trend)}%
-        </span>
-      )}
+import { Link } from 'react-router-dom';
+
+const StatCard = ({ icon, label, value, sub, trend, color = C.primary, delay = 0, to }) => {
+  const cardContent = (
+    <div className="kpi-card" style={{
+      background: C.surface, border: `1px solid ${C.border}`,
+      borderRadius: 16, padding: '20px 22px',
+      display: 'flex', flexDirection: 'column', gap: 10,
+      animationDelay: `${delay}s`,
+      height: '100%',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 32px ${color}22`; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 12,
+          background: `${color}22`, display: 'flex',
+          alignItems: 'center', justifyContent: 'center',
+          fontSize: 20,
+        }}>{icon}</div>
+        {trend && (
+          <span style={{
+            fontSize: 11, fontWeight: 700, padding: '3px 8px',
+            borderRadius: 20,
+            background: trend > 0 ? '#10b98122' : '#f43f5e22',
+            color: trend > 0 ? C.success : C.danger,
+          }}>
+            {trend > 0 ? '▲' : '▼'} {Math.abs(trend)}%
+          </span>
+        )}
+      </div>
+      <div>
+        <div style={{ color: C.muted, fontSize: 12, marginBottom: 2 }}>{label}</div>
+        <div style={{ color: C.text, fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em' }}>{value}</div>
+        {sub && <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{sub}</div>}
+      </div>
     </div>
-    <div>
-      <div style={{ color: C.muted, fontSize: 12, marginBottom: 2 }}>{label}</div>
-      <div style={{ color: C.text, fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em' }}>{value}</div>
-      {sub && <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{sub}</div>}
-    </div>
-  </div>
-);
+  );
+
+  return to ? <Link to={to} style={{ textDecoration: 'none' }}>{cardContent}</Link> : cardContent;
+};
 
 // ── Main Dashboard ────────────────────────────────────────────
 export default function Dashboard() {
@@ -204,7 +212,7 @@ export default function Dashboard() {
   };
 
   const tabs = ['overview', 'revenue', 'fleet', 'ai-analytics', 'activity'];
-  const tabLabels = { overview: 'Vue d\'ensemble', revenue: 'Revenus', fleet: 'Flotte', 'ai-analytics': '🤖 IA Analytics', activity: 'Activité' };
+  const tabLabels = { overview: 'Vue d\'ensemble', revenue: 'Revenus', fleet: 'Flotte', 'ai-analytics': <><Bot className="w-4 h-4 inline-block mb-1" /> IA Analytics</>, activity: 'Activité' };
 
   return (
     <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: "'Inter', 'Helvetica Neue', sans-serif", paddingTop: 64, color: C.text }}>
@@ -233,7 +241,7 @@ export default function Dashboard() {
             width: 36, height: 36, borderRadius: 10,
             background: `${C.primary}33`, display: 'flex',
             alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0,
-          }}>🤖</div>
+          }}><Bot className="w-6 h-6 text-primary-500" /></div>
           <div>
             <div style={{ fontSize: 11, color: C.primary, fontWeight: 700, marginBottom: 2, letterSpacing: '0.06em' }}>
               ANALYSE IA · TEMPS RÉEL
@@ -245,7 +253,7 @@ export default function Dashboard() {
         {/* ── KPI Cards ─────────────────────────────────── */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: 60, color: C.muted }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>⚙️</div>
+            <div style={{ marginBottom: 16 }}><Settings className="w-10 h-10 mx-auto text-slate-300 animate-spin" /></div>
             Chargement des données...
           </div>
         ) : (
@@ -255,31 +263,35 @@ export default function Dashboard() {
               gap: 16, marginBottom: 28,
             }}>
               <StatCard
-                icon="🚗" label="Véhicules Actifs"
+                icon={<Car className="w-6 h-6" />} label="Véhicules Actifs"
                 value={<AnimatedValue value={stats?.active_cars ?? 0} />}
                 sub={`${stats?.total_cars} total parc`}
                 trend={8} color={C.primary} delay={0}
+                to="/admin/cars"
               />
               <StatCard
-                icon="💰" label="Revenus du Mois"
+                icon={<DollarSign className="w-6 h-6" />} label="Revenus du Mois"
                 value={<><AnimatedValue value={financial?.current_month_revenue ?? 0} /> DT</>}
                 sub={`Total: ${(financial?.total_revenue || 0).toLocaleString('fr-FR')} DT`}
                 trend={12} color={C.success} delay={0.05}
+                to="/admin/payments"
               />
               <StatCard
-                icon="🔑" label="Locations en Cours"
+                icon={<Key className="w-6 h-6" />} label="Locations en Cours"
                 value={<AnimatedValue value={stats?.ongoing_rentals ?? 0} />}
                 sub={`${stats?.total_rentals} total`}
                 trend={-3} color={C.accent} delay={0.1}
+                to="/admin/rentals"
               />
               <StatCard
-                icon="👥" label="Clients Enregistrés"
+                icon={<Users className="w-6 h-6" />} label="Clients Enregistrés"
                 value={<AnimatedValue value={stats?.total_users ?? 0} />}
                 sub={`${financial?.paid_payments} paiements validés`}
                 trend={5} color={C.warning} delay={0.15}
+                to="/admin/clients"
               />
               <StatCard
-                icon="📈" label="Taux d'Occupation"
+                icon={<TrendingUp className="w-6 h-6" />} label="Taux d'Occupation"
                 value={<><AnimatedValue value={occupancyRate} />%</>}
                 sub="Calculé sur la flotte active"
                 color={occupancyRate > 70 ? C.success : C.warning} delay={0.2}
@@ -429,13 +441,13 @@ export default function Dashboard() {
 
                 {/* Financial summary cards */}
                 {[
-                  { label: 'Revenu Total', value: `${(financial?.total_revenue || 0).toLocaleString('fr-FR')} DT`, icon: '💵' },
-                  { label: 'Ce Mois', value: `${(financial?.current_month_revenue || 0).toLocaleString('fr-FR')} DT`, icon: '📅' },
-                  { label: 'Paiements Validés', value: `${financial?.paid_payments ?? 0} / ${financial?.total_payments ?? 0}`, icon: '✅' },
+                  { label: 'Revenu Total', value: `${(financial?.total_revenue || 0).toLocaleString('fr-FR')} DT`, icon: <Banknote className="w-8 h-8 text-slate-400" /> },
+                  { label: 'Ce Mois', value: `${(financial?.current_month_revenue || 0).toLocaleString('fr-FR')} DT`, icon: <Calendar className="w-8 h-8 text-slate-400" /> },
+                  { label: 'Paiements Validés', value: `${financial?.paid_payments ?? 0} / ${financial?.total_payments ?? 0}`, icon: <CheckCircle className="w-8 h-8 text-green-500" /> },
                   {
                     label: 'Taux de Paiement', value: financial?.total_payments
                       ? `${Math.round((financial.paid_payments / financial.total_payments) * 100)}%`
-                      : '—', icon: '📊'
+                      : '—', icon: <BarChart3 className="w-8 h-8 text-slate-400" />
                   },
                 ].map((item, i) => (
                   <div key={i} style={{
@@ -527,7 +539,7 @@ export default function Dashboard() {
                 }}>
                   <div>
                     <div style={{ fontSize: 18, fontWeight: 800, color: C.text, display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: 24 }}>🧠</span> Analyse Stratégique par IA
+                      <Brain className="w-6 h-6 text-purple-500" /> Analyse Stratégique par IA
                     </div>
                     <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>
                       Générez des prévisions et conseils basés sur les vraies données de votre agence (Google Gemini).
@@ -546,13 +558,13 @@ export default function Dashboard() {
                       transition: 'all .2s'
                     }}
                   >
-                    {aiLoading ? 'Analyse en cours...' : '✨ Générer l\'Analyse IA'}
+                    {aiLoading ? 'Analyse en cours...' : <><Sparkles className="w-4 h-4 inline-block mr-2" /> Générer l'Analyse IA</>}
                   </button>
                 </div>
 
                 {aiError && (
                   <div style={{ background: 'rgba(244,63,94,0.1)', border: `1px solid rgba(244,63,94,0.2)`, borderRadius: 12, padding: 16, color: C.danger, fontSize: 14 }}>
-                    ⚠️ {aiError}
+                    <AlertTriangle className="w-4 h-4 inline-block mr-2" /> {aiError}
                   </div>
                 )}
 
@@ -577,7 +589,9 @@ export default function Dashboard() {
                         background: C.surface, border: `1px solid ${C.border}`,
                         borderRadius: 16, padding: '24px',
                       }}>
-                        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>📊 Prévision des Revenus (IA)</div>
+                        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>
+                          <BarChart3 className="w-4 h-4 inline-block mr-2 text-primary-500" /> Prévision des Revenus (IA)
+                        </div>
                         <div style={{ fontSize: 12, color: C.muted, marginBottom: 20 }}>Estimation sur les 3 prochains mois selon la tendance actuelle</div>
                         <ResponsiveContainer width="100%" height={260}>
                           <BarChart data={realAiData.chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -598,8 +612,8 @@ export default function Dashboard() {
                         background: C.surface, border: `1px solid ${C.border}`,
                         borderRadius: 16, padding: '24px',
                       }}>
-                        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16, color: C.gold }}>
-                          💡 Recommandations Locatives (Générées par l'IA)
+                        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16, color: C.gold, display: 'flex', alignItems: 'center' }}>
+                          <Lightbulb className="w-4 h-4 inline-block mr-2" /> Recommandations Locatives (Générées par l'IA)
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
                           {realAiData.insights.map((insight, idx) => (
@@ -609,7 +623,12 @@ export default function Dashboard() {
                               borderRadius: '0 12px 12px 0', padding: '16px 20px',
                               display: 'flex', gap: 16, alignItems: 'flex-start'
                             }}>
-                              <div style={{ fontSize: 24 }}>{['🎯', '🚀', '💡', '🛡️'][idx % 4]}</div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {idx % 4 === 0 && <Target className="w-6 h-6 text-primary-500" />}
+                                {idx % 4 === 1 && <Rocket className="w-6 h-6 text-accent-500" />}
+                                {idx % 4 === 2 && <Lightbulb className="w-6 h-6 text-gold-500" />}
+                                {idx % 4 === 3 && <Shield className="w-6 h-6 text-success-500" />}
+                              </div>
                               <div>
                                 <div style={{ color: C.text, fontSize: 14, fontWeight: 700, marginBottom: 6 }}>{insight.title}</div>
                                 <div style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.6 }}>{insight.description}</div>

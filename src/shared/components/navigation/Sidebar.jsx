@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
 
 const NAV = [
   { to: '/admin/dashboard', icon: 'grid_view', label: 'Dashboard' },
@@ -160,8 +161,8 @@ export default function Sidebar() {
             border: '1px solid rgba(99,102,241,0.2)',
             borderRadius: 12, padding: '12px 14px',
           }}>
-            <div style={{ fontSize: 10, color: '#818cf8', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
-              ✨ FONCTIONS IA ACTIVES
+            <div style={{ fontSize: 10, color: '#818cf8', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Sparkles className="w-3 h-3 inline-block" /> FONCTIONS IA ACTIVES
             </div>
             <div style={{ fontSize: 11, color: '#475569', lineHeight: 1.5 }}>
               Auto-réponse avis · Annonces voitures · Dashboard intelligent

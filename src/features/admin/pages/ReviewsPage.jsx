@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import api from "../../config/api.config";
-import { generateReviewReply, analyzeSentiment } from "../../features/reviews/api/ai.service";
+import { Sparkles, Mail, RefreshCw, AlertTriangle, ClipboardList, Smile, Meh, Frown, BarChart3, Star, Search, Inbox } from "lucide-react";
+import api from "../../../config/api.config";
+import { generateReviewReply, analyzeSentiment } from "../../reviews/api/ai.service";
 
 /* ─── Typing Indicator ────────────────────────────────────── */
 const TypingIndicator = () => (
@@ -28,10 +29,10 @@ const StatCard = ({ icon, label, value, colorClass, bgClass }) => (
 /* ─── Review Row with AI Reply ────────────────────────────── */
 const ReviewRow = ({ review, onAiReply }) => {
     const [expanded, setExpanded] = useState(false);
-    const [aiReply, setAiReply] = useState(null);
+    const [aiReply, setAiReply] = useState(review.ai_reply || null);
     const [generating, setGenerating] = useState(false);
     const [sending, setSending] = useState(false);
-    const [sent, setSent] = useState(false);
+    const [sent, setSent] = useState(Boolean(review.ai_reply));
     const [sendError, setSendError] = useState(null);
 
     const sentiment = analyzeSentiment(review.rating);
@@ -58,6 +59,14 @@ const ReviewRow = ({ review, onAiReply }) => {
     }
 
     const handleGenerateReply = async () => {
+        if (sent && !aiReply) {
+            // Already sent but we might not have the text loaded properly
+            setExpanded(!expanded);
+            return;
+        } else if (sent) {
+            setExpanded(!expanded);
+            return;
+        }
         setExpanded(true);
         setGenerating(true);
         setSendError(null);
@@ -119,38 +128,39 @@ const ReviewRow = ({ review, onAiReply }) => {
                     {review.comment || <span className="text-slate-400 italic">Aucun commentaire</span>}
                 </div>
 
-                {/* Date */}
-                <div className="text-slate-400 text-xs font-medium shrink-0 w-24 text-right">
-                    {new Date(review.created_at).toLocaleDateString("fr-FR")}
+                {/* Date & Status */}
+                <div className="shrink-0 w-28 text-right flex flex-col items-end gap-1.5">
+                    <div className="text-slate-400 text-xs font-medium">
+                        {new Date(review.created_at).toLocaleDateString("fr-FR")}
+                    </div>
+                    {sent && (
+                        <div className="text-[10px] font-black text-green-600 bg-green-50 border border-green-100 px-2 py-0.5 rounded uppercase tracking-widest">
+                            Réponse envoyée
+                        </div>
+                    )}
                 </div>
 
                 {/* AI Reply Button */}
                 <div className="flex gap-2 shrink-0 justify-end w-36">
-                    {sent ? (
-                        <div className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-green-50 text-green-600 flex items-center gap-1.5">
-                            <span className="text-base text-green-500">✓</span> Envoyé
-                        </div>
-                    ) : (
-                        <button
-                            onClick={handleGenerateReply}
-                            disabled={generating}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 w-full
-                            ${generating
-                                    ? 'bg-indigo-50 text-indigo-400 cursor-wait'
-                                    : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-200 hover:-translate-y-0.5'}`}
-                        >
-                            {generating ? (
-                                <>
-                                    <span className="w-3 h-3 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin"></span>
-                                    Génération...
-                                </>
-                            ) : (
-                                <>
-                                    <span className="text-base">✨</span> Réponse IA
-                                </>
-                            )}
-                        </button>
-                    )}
+                    <button
+                        onClick={handleGenerateReply}
+                        disabled={generating}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 w-full
+                        ${generating
+                                ? 'bg-indigo-50 text-indigo-400 cursor-wait'
+                                : sent ? 'bg-white border border-indigo-200 text-indigo-600 hover:bg-slate-50 shadow-sm' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-200 hover:-translate-y-0.5'}`}
+                    >
+                        {generating ? (
+                            <>
+                                <span className="w-3 h-3 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin"></span>
+                                Génération...
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles className="w-4 h-4" /> {sent ? "Voir Réponse" : "Réponse IA"}
+                            </>
+                        )}
+                    </button>
                 </div>
             </div>
 
@@ -170,7 +180,7 @@ const ReviewRow = ({ review, onAiReply }) => {
                     ) : aiReply ? (
                         <div className="pl-4">
                             <div className="flex items-center gap-2 mb-3">
-                                <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">✨</div>
+                                <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs"><Sparkles className="w-4 h-4" /></div>
                                 <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded-md">
                                     Brouillon Généré par l'IA
                                 </span>
@@ -197,7 +207,7 @@ const ReviewRow = ({ review, onAiReply }) => {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <span className="text-lg">📧</span> Envoyer l'Email
+                                                    <Mail className="w-5 h-5 inline-block mr-1" /> Envoyer l'Email
                                                 </>
                                             )}
                                         </button>
@@ -206,7 +216,7 @@ const ReviewRow = ({ review, onAiReply }) => {
                                             disabled={sending}
                                             className="px-4 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors flex items-center gap-2 disabled:opacity-50"
                                         >
-                                            🔄 Régénérer
+                                            <RefreshCw className="w-4 h-4" /> Régénérer
                                         </button>
                                     </>
                                 )}
@@ -220,7 +230,7 @@ const ReviewRow = ({ review, onAiReply }) => {
 
                             {sendError && (
                                 <div className="mt-3 px-4 py-2 bg-red-50 border border-red-100 text-red-600 text-xs font-bold rounded-lg flex items-center gap-2">
-                                    <span>⚠️</span> {sendError}
+                                    <AlertTriangle className="w-4 h-4" /> {sendError}
                                 </div>
                             )}
                         </div>
@@ -277,22 +287,22 @@ export default function Reviews() {
         });
 
     const FILTERS = [
-        { key: 'all', label: 'Tous', icon: '📋' },
-        { key: 'positive', label: 'Positifs', icon: '😊' },
-        { key: 'neutral', label: 'Neutres', icon: '😐' },
-        { key: 'negative', label: 'Négatifs', icon: '😟' },
+        { key: 'all', label: 'Tous', icon: <ClipboardList className="w-4 h-4" /> },
+        { key: 'positive', label: 'Positifs', icon: <Smile className="w-4 h-4" /> },
+        { key: 'neutral', label: 'Neutres', icon: <Meh className="w-4 h-4" /> },
+        { key: 'negative', label: 'Négatifs', icon: <Frown className="w-4 h-4" /> },
     ];
 
     return (
         <main className="flex-1 overflow-y-auto bg-slate-50 min-h-screen">
-            
+
 
             <div className="p-8 space-y-6 max-w-7xl mx-auto w-full">
 
                 {/* AI Banner */}
                 <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-5 flex items-start sm:items-center gap-4 shadow-sm relative overflow-hidden">
                     <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-indigo-100 to-transparent opacity-50"></div>
-                    <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center text-2xl shrink-0 z-10">✨</div>
+                    <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center text-2xl shrink-0 z-10"><Sparkles className="w-6 h-6 text-indigo-500" /></div>
                     <div className="z-10">
                         <div className="text-xs font-black text-indigo-600 uppercase tracking-widest mb-1">
                             Assistant IA Intégré
@@ -305,15 +315,15 @@ export default function Reviews() {
 
                 {/* KPI Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard icon="📊" label="Total Avis" value={reviews.length} colorClass="text-blue-600" bgClass="bg-blue-50" />
-                    <StatCard icon="⭐" label="Note Moyenne" value={`${avgRating}/10`} colorClass="text-amber-500" bgClass="bg-amber-50" />
-                    <StatCard icon="😊" label="Avis Positifs" value={`${positivePercent}%`} colorClass="text-green-600" bgClass="bg-green-50" />
+                    <StatCard icon={<BarChart3 className="w-6 h-6" />} label="Total Avis" value={reviews.length} colorClass="text-blue-600" bgClass="bg-blue-50" />
+                    <StatCard icon={<Star className="w-6 h-6" />} label="Note Moyenne" value={`${avgRating}/10`} colorClass="text-amber-500" bgClass="bg-amber-50" />
+                    <StatCard icon={<Smile className="w-6 h-6" />} label="Avis Positifs" value={`${positivePercent}%`} colorClass="text-green-600" bgClass="bg-green-50" />
                 </div>
 
                 {/* Controls Bar */}
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
                     <div className="flex-1 min-w-[200px] relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Search className="w-5 h-5" /></span>
                         <input
                             type="text" value={search} onChange={e => setSearch(e.target.value)}
                             placeholder="Rechercher par client, véhicule ou commentaire..."
@@ -328,7 +338,7 @@ export default function Reviews() {
                                 className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5
                                 ${filter === f.key ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100'}`}
                             >
-                                <span className="text-base">{f.icon}</span> {f.label}
+                                <span className="flex items-center">{f.icon}</span> {f.label}
                             </button>
                         ))}
                     </div>
@@ -350,7 +360,7 @@ export default function Reviews() {
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center shadow-sm">
-                        <div className="text-5xl mb-4">📭</div>
+                        <div className="mb-4"><Inbox className="w-12 h-12 mx-auto text-slate-300" /></div>
                         <h3 className="text-xl font-bold text-slate-900 mb-2">Aucun avis trouvé</h3>
                         <p className="text-slate-500">{search ? `Aucun résultat pour la recherche` : 'Aucun avis dans cette catégorie'}</p>
                     </div>

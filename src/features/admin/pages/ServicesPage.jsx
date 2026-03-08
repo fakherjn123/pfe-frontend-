@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getServices, getAlerts, updateServiceStatus, createService } from './api/service.service';
-import api from '../../config/api.config';
+import { getServices, getAlerts, updateServiceStatus, createService } from '../api/service.service';
+import api from '../../../config/api.config';
 
 const Services = () => {
     const [services, setServices] = useState([]);

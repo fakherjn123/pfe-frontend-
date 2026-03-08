@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../config/api.config";
 import {
-    LineChart,
-    Line,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -12,8 +10,7 @@ import {
     Area,
     AreaChart
 } from "recharts";
-
-const sans = "'Inter', 'Helvetica Neue', sans-serif";
+import { Activity, ArrowLeft, TrendingUp, DollarSign } from "lucide-react";
 
 export default function RentalHistoryPage() {
     const [chartData, setChartData] = useState([]);
@@ -60,21 +57,14 @@ export default function RentalHistoryPage() {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
-                <div style={{
-                    background: "rgba(255, 255, 255, 0.95)",
-                    border: "1px solid #e8e8e8",
-                    padding: "16px",
-                    borderRadius: "12px",
-                    boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
-                    fontFamily: sans
-                }}>
-                    <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: 13, color: "#0a0a0a" }}>{label}</p>
+                <div className="bg-white/95 border border-slate-200 p-4 rounded-xl shadow-xl shadow-slate-200/50 backdrop-blur-sm">
+                    <p className="m-0 mb-3 font-bold text-sm text-slate-900">{label}</p>
                     {payload.map((entry, index) => (
-                        <div key={index} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
-                            <div style={{ width: 8, height: 8, borderRadius: "50%", background: entry.color }} />
-                            <span style={{ fontSize: 13, color: "#666", flex: 1 }}>{entry.name}:</span>
-                            <span style={{ fontSize: 14, fontWeight: 700, color: "#0a0a0a" }}>
-                                {entry.value} {entry.name === "Revenus" ? "TND" : ""}
+                        <div key={index} className="flex items-center gap-3 mb-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full" style={{ background: entry.color }} />
+                            <span className="text-sm font-medium text-slate-500 flex-1">{entry.name}:</span>
+                            <span className="text-sm font-black text-slate-900">
+                                {Number(entry.value).toLocaleString('fr-FR')} {entry.name === "Revenus" ? "DT" : ""}
                             </span>
                         </div>
                     ))}
@@ -85,88 +75,113 @@ export default function RentalHistoryPage() {
     };
 
     return (
-        <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: sans, paddingTop: 64 }}>
-            <div style={{ background: "#fff", borderBottom: "1px solid #ebebeb", padding: "36px 40px" }}>
-                <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ fontFamily: "'Inter', sans-serif" }} className="pb-16 bg-slate-50 min-h-[calc(100vh-64px)]">
+            {/* Header section matching other pages */}
+            <div className="bg-white border-b border-slate-100 px-8 py-8 mb-8">
+                <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <h1 style={{ color: "#0a0a0a", fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>
-                            Évolution des Locations
-                        </h1>
-                        <p style={{ color: "#bbb", fontSize: 13, margin: "6px 0 0" }}>
-                            Aperçu mensuel (Total: {totalRentals} locations)
-                        </p>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                <Activity className="w-5 h-5" />
+                            </div>
+                            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Évolution Mensuelle</h2>
+                        </div>
+                        <p className="text-sm font-medium text-slate-500 ml-13">Aperçu chronologique de vos locations et revenus.</p>
                     </div>
-                    <Link to="/admin/rentals" style={{
-                        textDecoration: "none", color: "#0a0a0a", fontSize: 13, fontWeight: 600,
-                        padding: "10px 18px", border: "1px solid #e8e8e8", borderRadius: 8,
-                        background: "#fff", transition: "all 0.15s"
-                    }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = "#999"; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
-                    >
-                        ← Retour aux locations
-                    </Link>
+                    <div className="flex items-center gap-4">
+                        <Link
+                            to="/admin/rentals"
+                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all hover:shadow-sm"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            Retour aux locations
+                        </Link>
+                    </div>
                 </div>
             </div>
 
-            <div style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 40px 80px" }}>
+            <div className="max-w-5xl mx-auto px-8">
+                {/* Global Stats Overview */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-wrap gap-6 items-center">
+                    <div className="flex-1 px-4 py-2">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Historique</div>
+                        <div className="text-2xl font-black text-slate-900">{totalRentals} locations</div>
+                    </div>
+                </div>
+
                 {loading ? (
-                    <div style={{ color: "#ccc", padding: "60px 0", textAlign: "center", fontSize: 13 }}>Chargement des données...</div>
+                    <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-indigo-600 animate-spin mb-4"></div>
+                        <p className="text-slate-400 font-medium">Chargement des données...</p>
+                    </div>
                 ) : chartData.length === 0 ? (
-                    <div style={{
-                        background: "#fff", border: "1px solid #ebebeb", borderRadius: 12,
-                        padding: "60px", textAlign: "center",
-                    }}>
-                        <p style={{ color: "#ccc", fontSize: 14, margin: "0 0 16px" }}>Aucune donnée disponible pour afficher le graphique.</p>
+                    <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <Activity className="w-16 h-16 text-slate-200 mb-4" />
+                        <p className="text-slate-400 font-medium text-lg">Aucune donnée disponible pour afficher le graphique.</p>
                     </div>
                 ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
-
+                    <div className="flex flex-col gap-8">
                         {/* Chart 1: Evolution of Rentals */}
-                        <div style={{ background: "#fff", padding: "32px", borderRadius: 16, border: "1px solid #ebebeb", boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
-                            <div style={{ marginBottom: 24 }}>
-                                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#0a0a0a" }}>Nombre de locations par mois</h3>
-                                <p style={{ margin: "4px 0 0", fontSize: 13, color: "#aaa" }}>Courbe d'évolution du volume de réservations</p>
+                        <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+
+                            <div className="mb-8 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+                                    <TrendingUp className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black text-slate-900 m-0 leading-none mb-1.5">Nombre de locations</h3>
+                                    <p className="text-xs font-medium text-slate-500 m-0">Courbe d'évolution du volume mensuel</p>
+                                </div>
                             </div>
-                            <div style={{ height: 350, width: "100%" }}>
+
+                            <div className="h-[350px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorLocations" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#0a0a0a" stopOpacity={0.2} />
-                                                <stop offset="95%" stopColor="#0a0a0a" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.2} />
+                                                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#aaa' }} dy={10} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#aaa' }} />
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} dy={10} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <Tooltip content={<CustomTooltip />} />
-                                        <Area type="monotone" dataKey="locations" name="Locations" stroke="#0a0a0a" strokeWidth={3} fillOpacity={1} fill="url(#colorLocations)" activeDot={{ r: 6, strokeWidth: 0, fill: '#0a0a0a' }} />
+                                        <Area type="monotone" dataKey="locations" name="Locations" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#colorLocations)" activeDot={{ r: 6, strokeWidth: 0, fill: '#4f46e5' }} />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
 
                         {/* Chart 2: Evolution of Revenue */}
-                        <div style={{ background: "#fff", padding: "32px", borderRadius: 16, border: "1px solid #ebebeb", boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
-                            <div style={{ marginBottom: 24 }}>
-                                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#0a0a0a" }}>Chiffre d'affaires par mois (TND)</h3>
-                                <p style={{ margin: "4px 0 0", fontSize: 13, color: "#aaa" }}>Courbe d'évolution des revenus générés</p>
+                        <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+
+                            <div className="mb-8 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                    <DollarSign className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black text-slate-900 m-0 leading-none mb-1.5">Chiffre d'affaires (TND)</h3>
+                                    <p className="text-xs font-medium text-slate-500 m-0">Revenus générés par mois</p>
+                                </div>
                             </div>
-                            <div style={{ height: 350, width: "100%" }}>
+
+                            <div className="h-[350px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorRevenus" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2} />
-                                                <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="#059669" stopOpacity={0.2} />
+                                                <stop offset="95%" stopColor="#059669" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#aaa' }} dy={10} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#aaa' }} />
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} dy={10} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <Tooltip content={<CustomTooltip />} />
-                                        <Area type="monotone" dataKey="revenus" name="Revenus" stroke="#22c55e" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenus)" activeDot={{ r: 6, strokeWidth: 0, fill: '#22c55e' }} />
+                                        <Area type="monotone" dataKey="revenus" name="Revenus" stroke="#059669" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenus)" activeDot={{ r: 6, strokeWidth: 0, fill: '#059669' }} />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>
