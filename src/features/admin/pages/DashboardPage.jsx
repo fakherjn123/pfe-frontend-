@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flame, CheckCircle, AlertTriangle, Bot, Settings, Car, DollarSign, Key, Users, TrendingUp, Banknote, Calendar, BarChart3, Brain, Sparkles, Lightbulb, Target, Rocket, Shield } from 'lucide-react';
+import { Flame, CheckCircle, AlertTriangle, Bot, Settings, Car, DollarSign, Key, Users, TrendingUp, Banknote, Calendar, BarChart3, Brain, Sparkles, Lightbulb, Target, Rocket, Shield, Download } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -7,7 +7,7 @@ import {
   PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
 import { getDashboardStats, getFinancialStats, getTopCars, getMonthlyHistory } from '../api/report.service';
-import api from '../../../config/api.config';
+import api from '../../../config/api.config.js';
 
 // ── Colour tokens ────────────────────────────────────────────
 const C = {
@@ -211,20 +211,55 @@ export default function Dashboard() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await api.get('/export/rentals', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `rapport_locations_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (err) {
+      console.error("Export error:", err);
+      alert("Erreur lors de l'exportation du CSV");
+    }
+  };
+
   const tabs = ['overview', 'revenue', 'fleet', 'ai-analytics', 'activity'];
   const tabLabels = { overview: 'Vue d\'ensemble', revenue: 'Revenus', fleet: 'Flotte', 'ai-analytics': <><Bot className="w-4 h-4 inline-block mb-1" /> IA Analytics</>, activity: 'Activité' };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: "'Inter', 'Helvetica Neue', sans-serif", paddingTop: 64, color: C.text }}>
+    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: "'Inter', 'Helvetica Neue', sans-serif", color: C.text }}>
       {/* Header */}
       <div style={{ background: "#fff", borderBottom: `1px solid ${C.border}`, padding: "36px 40px" }}>
         <div style={{ maxWidth: 1160, margin: "0 auto" }}>
-          <p style={{ color: C.muted, fontSize: 12, margin: "0 0 6px" }}>
-            {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-          </p>
-          <h1 style={{ color: C.text, fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>
-            Dashboard
-          </h1>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <div>
+              <p style={{ color: C.muted, fontSize: 12, margin: "0 0 6px" }}>
+                {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+              </p>
+              <h1 style={{ color: C.text, fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>
+                Dashboard
+              </h1>
+            </div>
+            <button
+              onClick={handleExport}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: C.surface, border: `1px solid ${C.border}`,
+                padding: '10px 18px', borderRadius: 12, fontSize: 13, fontWeight: 700,
+                color: C.text, cursor: 'pointer', transition: 'all 0.2s',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#fcfcfc'; e.currentTarget.style.borderColor = C.primary; }}
+              onMouseLeave={e => { e.currentTarget.style.background = C.surface; e.currentTarget.style.borderColor = C.border; }}
+            >
+              <Download size={16} className="text-primary-500" />
+              Exporter Rapport CSV
+            </button>
+          </div>
         </div>
       </div>
 

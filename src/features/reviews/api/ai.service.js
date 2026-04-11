@@ -1,4 +1,4 @@
-import api from "../../../config/api.config";
+import api from "../../../config/api.config.js";
 
 /**
  * AI Service for Reviews — REAL Backend Integration
@@ -28,13 +28,13 @@ export const generateReviewReply = async (review) => {
 
 /**
  * Analyzes review sentiment
- * @param {number} rating - Review rating (1-5)
+ * @param {number} rating - Review rating (1-10)
  * @returns {{ label: string, color: string, emoji: string }}
  */
 export const analyzeSentiment = (rating) => {
-    if (rating >= 4) return { label: 'Positif', color: '#10b981', emoji: '😊' };
-    if (rating >= 3) return { label: 'Neutre', color: '#f59e0b', emoji: '😐' };
-    return { label: 'Négatif', color: '#f43f5e', emoji: '😟' };
+    if (rating >= 7) return { label: 'POSITIVE', color: '#10b981', emoji: '😊' };
+    if (rating >= 4) return { label: 'NEUTRAL', color: '#f59e0b', emoji: '😐' };
+    return { label: 'NEGATIVE', color: '#f43f5e', emoji: '😟' };
 };
 
 /**

@@ -5,15 +5,15 @@ import Header from '../navigation/Header';
 import { io } from 'socket.io-client';
 
 const PAGE_TITLES = {
-  '/admin/dashboard':          'Dashboard',
-  '/admin/cars':               'Gestion Flotte',
-  '/admin/contracts':          'Contrats',
-  '/admin/invoices':           'Factures',
-  '/admin/services':           'Maintenance',
-  '/admin/clients':            'Clients',
-  '/admin/reports':            'Rapports de Performance',
-  '/admin/reports/export':     'Export PDF',
-  '/admin/reports/forecasts':  'Prévisions IA',
+  '/admin/dashboard': 'Dashboard',
+  '/admin/cars': 'Gestion Flotte',
+  '/admin/contracts': 'Contrats',
+  '/admin/invoices': 'Factures',
+  '/admin/services': 'Maintenance',
+  '/admin/clients': 'Clients',
+  '/admin/reports': 'Rapports de Performance',
+  '/admin/reports/export': 'Export PDF',
+  '/admin/reports/forecasts': 'Prévisions IA',
 };
 
 export default function DashboardLayout() {
@@ -26,19 +26,19 @@ export default function DashboardLayout() {
     document.documentElement.classList.add('dark');
 
     // Connect Socket.io
-    const socket = io("http://localhost:5000"); 
-    
+    const socket = io("http://localhost:5000");
+
     // Request joining admin room
     socket.emit("join-admin");
 
     socket.on("new_notification", (data) => {
-       const id = Date.now();
-       const newNotif = { ...data, id };
-       setNotifications((prev) => [...prev, newNotif]);
-       
-       setTimeout(() => {
-         setNotifications((prev) => prev.filter(n => n.id !== id));
-       }, 5000); 
+      const id = Date.now();
+      const newNotif = { ...data, id };
+      setNotifications((prev) => [...prev, newNotif]);
+
+      setTimeout(() => {
+        setNotifications((prev) => prev.filter(n => n.id !== id));
+      }, 5000);
     });
 
     return () => {
@@ -76,17 +76,17 @@ export default function DashboardLayout() {
 
       {/* Toast Container */}
       <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-         {notifications.map(n => (
-            <div key={n.id} style={{ 
-               background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '16px',
-               color: '#f8fafc', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)', minWidth: '300px',
-               borderLeft: n.type === 'license_upload' ? '4px solid #3b82f6' : '4px solid #10b981',
-               animation: 'slideIn 0.3s ease-out'
-            }}>
-               <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>{n.title}</h4>
-               <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#94a3b8' }}>{n.message}</p>
-            </div>
-         ))}
+        {notifications.map(n => (
+          <div key={n.id} style={{
+            background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '16px',
+            color: '#f8fafc', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)', minWidth: '300px',
+            borderLeft: n.type === 'license_upload' ? '4px solid #3b82f6' : '4px solid #10b981',
+            animation: 'slideIn 0.3s ease-out'
+          }}>
+            <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>{n.title}</h4>
+            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#94a3b8' }}>{n.message}</p>
+          </div>
+        ))}
       </div>
       <style>{`
         @keyframes slideIn {

@@ -1,241 +1,390 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import api from "../../../config/api.config";
-import { Car, Calendar, Clock, CreditCard, ChevronRight, Activity, CalendarDays, Key, XCircle, Truck, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../../config/api.config.js";
+import { Search, Clock, CheckCircle, Truck, Activity, ClipboardCheck } from "lucide-react";
+import InspectionModal from "../../../shared/components/modals/InspectionModal";
 
-const STATUS = {
-    confirmed: { color: "text-sky-600", bg: "bg-sky-50", label: "Confirmée" },
-    ongoing: { color: "text-emerald-600", bg: "bg-emerald-50", label: "En cours" },
-    completed: { color: "text-slate-500", bg: "bg-slate-100", label: "Terminée" },
-    cancelled: { color: "text-rose-600", bg: "bg-rose-50", label: "Annulée" },
-    awaiting_payment: { color: "text-amber-600", bg: "bg-amber-50", label: "Paiement requis" },
+const sans = "'Inter', 'Helvetica Neue', sans-serif";
+const BLUE = "#2563EB";
+
+// ── Status config ─────────────────────────────────────────────
+const STATUS_CFG = {
+  awaiting_payment: { label: "Paiement requis", color: "#D97706", bg: "#FFFBEB", border: "#FDE68A" },
+  pending:          { label: "En attente",       color: "#D97706", bg: "#FFFBEB", border: "#FDE68A" },
+  confirmed:        { label: "Confirmée",        color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE" },
+  ongoing:          { label: "En cours",         color: "#059669", bg: "#ECFDF5", border: "#A7F3D0" },
+  delivered:        { label: "Livrée",           color: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE" },
+  completed:        { label: "Terminée",         color: "#6B7280", bg: "#F9FAFB", border: "#E5E7EB" },
+  cancelled:        { label: "Annulée",          color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" },
 };
 
+// Status progression: what's the next status + button label
+const NEXT_STATUS = {
+  pending:   { next: "confirmed", label: "→ Confirmée" },
+  confirmed: { next: "delivered", label: "→ Livrée"   },
+  ongoing:   { next: "delivered", label: "→ Livrée"   },
+  delivered: { next: "completed", label: "→ Terminée" },
+};
+
+// ── KPI Card ──────────────────────────────────────────────────
+function KpiCard({ icon, count, label, color, bg }) {
+  return (
+    <div style={{
+      flex: 1, background: bg, borderRadius: 16,
+      padding: "22px 24px", minWidth: 180,
+      border: `1.5px solid ${color}22`,
+    }}>
+      <div style={{ color, marginBottom: 10, fontSize: 22 }}>{icon}</div>
+      <div style={{ fontSize: 32, fontWeight: 900, color, letterSpacing: "-0.02em", lineHeight: 1 }}>{count}</div>
+      <div style={{ fontSize: 14, fontWeight: 600, color, marginTop: 6, opacity: 0.85 }}>{label}</div>
+    </div>
+  );
+}
+
+// ── Status Badge ──────────────────────────────────────────────
+function StatusBadge({ status }) {
+  const cfg = STATUS_CFG[status] || STATUS_CFG.confirmed;
+  return (
+    <span style={{
+      display: "inline-block", padding: "4px 12px", borderRadius: 20,
+      fontSize: 12, fontWeight: 700, letterSpacing: "0.01em",
+      color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
+      whiteSpace: "nowrap",
+    }}>
+      {cfg.label}
+    </span>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────
 export default function AllRentalsPage() {
-    const navigate = useNavigate();
-    const [rentals, setRentals] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [cancellingId, setCancellingId] = useState(null);
+  const navigate = useNavigate();
+  const [rentals, setRentals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
+  const [progressingId, setProgressingId] = useState(null);
+  const [selectedRental, setSelectedRental] = useState(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-    useEffect(() => {
-        setLoading(true);
-        api.get("/rentals/all")
-            .then(res => setRentals(res.data))
-            .catch(err => console.error(err))
-            .finally(() => setLoading(false));
-    }, []);
+  useEffect(() => {
+    api.get("/rentals/all")
+      .then(res => setRentals(res.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
-    const cancelRental = async (rentalId) => {
-        if (!window.confirm("Voulez-vous vraiment annuler cette réservation ?")) return;
-        setCancellingId(rentalId);
-        try {
-            const res = await api.put(`/rentals/admin/cancel/${rentalId}`);
-            
-            if (res.data.requiresRefund) {
-                alert(`⚠️ ATTENTION : Réservation annulée avec succès.\n\nCe client (${res.data.clientName}) avait déjà payé sa réservation.\nVous devez procéder au REMBOURSEMENT manuel de ${res.data.refundAmount} DT.\n\nUn email automatique d'annulation affirmant qu'un remboursement sera fait a été envoyé au client.`);
-            } else {
-                alert("Réservation annulée avec succès.");
-            }
+  // ── Actions ──────────────────────────────────────────────────
+  const cancelRental = async (rentalId) => {
+    if (!window.confirm("Voulez-vous vraiment annuler cette réservation ?")) return;
+    setCancellingId(rentalId);
+    try {
+      const res = await api.put(`/rentals/admin/cancel/${rentalId}`);
+      if (res.data.requiresRefund) {
+        alert(`⚠️ Réservation annulée.\nRemboursement manuel de ${res.data.refundAmount} DT requis pour ${res.data.clientName}.`);
+      }
+      setRentals(prev => prev.map(r => r.id === rentalId ? { ...r, status: "cancelled" } : r));
+    } catch (err) {
+      alert(err.response?.data?.message || "Erreur.");
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
-            setRentals(prev => prev.map(r => r.id === rentalId ? { ...r, status: 'cancelled' } : r));
-        } catch (err) {
-            alert(err.response?.data?.message || "Erreur lors de l'annulation.");
-        } finally {
-            setCancellingId(null);
-        }
-    };
+  const progressStatus = async (rental) => {
+    const prog = NEXT_STATUS[rental.status];
+    if (!prog) return;
+    setProgressingId(rental.id);
+    try {
+      await api.put(`/rentals/admin/status/${rental.id}`, { status: prog.next });
+      setRentals(prev => prev.map(r => r.id === rental.id ? { ...r, status: prog.next } : r));
+    } catch {
+      // Fallback: try delivery status endpoint
+      try {
+        await api.put(`/delivery/${rental.id}/delivery-status`, { status: prog.next });
+        setRentals(prev => prev.map(r => r.id === rental.id ? { ...r, status: prog.next } : r));
+      } catch (err2) {
+        alert("Erreur lors de la mise à jour du statut.");
+      }
+    } finally {
+      setProgressingId(null);
+    }
+  };
 
-    const updateDeliveryStatus = async (rentalId, status) => {
-        try {
-            await api.put(`/delivery/${rentalId}/delivery-status`, { status });
-            setRentals(prev => prev.map(r => r.id === rentalId ? { ...r, delivery_status: status } : r));
-        } catch (err) {
-            console.error(err);
-            alert("Erreur lors de la mise à jour du statut de livraison");
-        }
-    };
+  // ── Helpers ───────────────────────────────────────────────────
+  const fmt = (d) => new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const fmtId = (id) => `RNT-${String(id).padStart(3, "0")}`;
 
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString("fr-FR", {
-            day: "2-digit", month: "short", year: "numeric"
-        });
-    };
+  // ── Filtered list ─────────────────────────────────────────────
+  const filtered = rentals.filter(r => {
+    const q = search.toLowerCase();
+    const matchSearch = !q ||
+      fmtId(r.id).toLowerCase().includes(q) ||
+      (r.user_name || "").toLowerCase().includes(q) ||
+      (r.brand || "").toLowerCase().includes(q) ||
+      (r.model || "").toLowerCase().includes(q);
+    const matchStatus = statusFilter === "all" || r.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
 
-    const calculateDays = (s, e) => Math.ceil((new Date(e) - new Date(s)) / 86400000);
+  // ── KPI counts ────────────────────────────────────────────────
+  const pending   = rentals.filter(r => r.status === "pending" || r.status === "awaiting_payment").length;
+  const confirmed = rentals.filter(r => r.status === "confirmed").length;
+  const delivered = rentals.filter(r => r.status === "delivered" || r.status === "ongoing").length;
 
-    const formatCurrency = (amount) => {
-        return Number(amount).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    };
+  const activeCount = rentals.filter(r => !["cancelled", "completed"].includes(r.status)).length;
 
-    return (
-        <div style={{ fontFamily: "'Inter', sans-serif" }} className="pb-16 bg-slate-50 min-h-[calc(100vh-64px)]">
-            {/* Header section matching other pages */}
-            <div className="bg-white border-b border-slate-100 px-8 py-8 mb-8">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                                <Key className="w-5 h-5" />
-                            </div>
-                            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Toutes les Locations</h2>
-                        </div>
-                        <p className="text-sm font-medium text-slate-500 ml-13">Gérez et suivez l'ensemble de vos réservations.</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => navigate('/admin/rentals/history')}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20 cursor-pointer"
-                        >
-                            <Activity className="w-5 h-5" />
-                            Historique Mensuel
-                        </button>
-                    </div>
-                </div>
-            </div>
+  return (
+    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: sans, padding: "32px" }}>
 
-            <div className="max-w-7xl mx-auto px-8">
-                {/* Stats / Overview Bar */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-wrap gap-6 items-center">
-                    <div className="flex-1 px-4 py-2">
-                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Réservations</div>
-                        <div className="text-2xl font-black text-slate-900">{rentals.length}</div>
-                    </div>
-                    <div className="w-px h-12 bg-slate-100 hidden md:block"></div>
-                    <div className="flex-1 px-4 py-2">
-                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">En Cours</div>
-                        <div className="text-2xl font-black text-emerald-600">
-                            {rentals.filter(r => r.status === 'ongoing').length}
-                        </div>
-                    </div>
-                    <div className="w-px h-12 bg-slate-100 hidden md:block"></div>
-                    <div className="flex-1 px-4 py-2">
-                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">En Attente</div>
-                        <div className="text-2xl font-black text-amber-500">
-                            {rentals.filter(r => r.status === 'awaiting_payment').length}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Grid List */}
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-indigo-600 animate-spin mb-4"></div>
-                        <p className="text-slate-400 font-medium">Chargement des locations...</p>
-                    </div>
-                ) : rentals.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <Key className="w-16 h-16 text-slate-200 mb-4" />
-                        <p className="text-slate-400 font-medium text-lg">Aucune location n'a été trouvée.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {rentals.map(rental => {
-                            const cfg = STATUS[rental.status] || STATUS.confirmed;
-                            const duration = calculateDays(rental.start_date, rental.end_date);
-
-                            return (
-                                <div key={rental.id} className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group flex flex-col">
-                                    <div className="p-5 flex-grow">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg ${cfg.bg} ${cfg.color}`}>
-                                                    {cfg.label}
-                                                </span>
-                                                <span className="text-xs font-bold text-slate-300">#{String(rental.id).padStart(4, "0")}</span>
-                                            </div>
-                                            <div className="text-sm font-bold text-slate-700 bg-slate-50 px-2.5 py-1 rounded-md">
-                                                {rental.user_name || `Client #${rental.user_id}`}
-                                            </div>
-                                        </div>
-
-                                        <h3 className="text-xl font-black text-slate-900 mt-2 mb-4 flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-                                                <Car className="w-4 h-4" />
-                                            </div>
-                                            {rental.brand || rental.Car?.brand} {rental.model || rental.Car?.model}
-                                        </h3>
-
-                                        <div className="grid grid-cols-2 gap-y-4 gap-x-2 bg-slate-50/50 p-4 rounded-xl border border-slate-50">
-                                            <div>
-                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                                                    <CalendarDays className="w-3 h-3" /> Départ
-                                                </div>
-                                                <div className="text-sm font-bold text-slate-700">{formatDate(rental.start_date)}</div>
-                                            </div>
-                                            <div>
-                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                                                    <Calendar className="w-3 h-3" /> Retour
-                                                </div>
-                                                <div className="text-sm font-bold text-slate-700">{formatDate(rental.end_date)}</div>
-                                            </div>
-                                            <div>
-                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                                                    <Clock className="w-3 h-3" /> Durée
-                                                </div>
-                                                <div className="text-sm font-bold text-slate-700">{duration} jour{duration > 1 ? 's' : ''}</div>
-                                            </div>
-                                            <div>
-                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                                                    <CreditCard className="w-3 h-3" /> Montant
-                                                </div>
-                                                <div className="text-sm font-black text-indigo-700">{formatCurrency(rental.total_price)} <span className="text-[10px] font-bold text-indigo-400">DT</span></div>
-                                            </div>
-                                            
-                                            {rental.delivery_requested && (
-                                                <div className="col-span-2 mt-2 pt-3 border-t border-slate-200/60">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <div className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider flex items-center gap-1.5">
-                                                            <Truck className="w-3 h-3" /> Livraison à Domicile
-                                                        </div>
-                                                        <select
-                                                            value={rental.delivery_status || 'pending'}
-                                                            onChange={(e) => updateDeliveryStatus(rental.id, e.target.value)}
-                                                            className="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg px-2 py-1 outline-none font-bold cursor-pointer hover:bg-indigo-100 transition-colors"
-                                                        >
-                                                            <option value="pending">En agence</option>
-                                                            <option value="en_route">En route pour livraison</option>
-                                                            <option value="delivered">Livrée</option>
-                                                        </select>
-                                                    </div>
-                                                    <div className="flex items-start gap-2 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100">
-                                                        <MapPin className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-                                                        <div className="flex-1">
-                                                            <div className="text-xs font-semibold text-slate-700 leading-snug">{rental.delivery_address}</div>
-                                                            {rental.delivery_time && (
-                                                                <div className="text-[11px] font-bold text-slate-500 mt-1 flex items-center gap-1">
-                                                                    <Clock className="w-3 h-3 text-slate-400" /> Souhaitée à {rental.delivery_time}
-                                                                </div>
-                                                            )}
-                                                            <div className="text-[10px] font-bold text-indigo-600 mt-1">
-                                                                Frais : {formatCurrency(Number(rental.delivery_fee || 0) + Number(rental.return_fee || 0))} DT (A/R)
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Cancel button - only for active rentals */}
-                                    {rental.status !== 'cancelled' && rental.status !== 'completed' && (
-                                        <div className="px-5 pb-4">
-                                            <button
-                                                onClick={() => cancelRental(rental.id)}
-                                                disabled={cancellingId === rental.id}
-                                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                                            >
-                                                <XCircle className="w-4 h-4" />
-                                                {cancellingId === rental.id ? "Annulation..." : "Annuler la réservation"}
-                                            </button>
-                                        </div>
-                                    )}
-
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
+      {/* ── Page Header ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: "#111827", margin: "0 0 6px", letterSpacing: "-0.02em" }}>
+            Locations Actives
+          </h1>
+          <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{activeCount} location{activeCount !== 1 ? "s" : ""} en cours</p>
         </div>
-    );
+        <button
+          onClick={() => navigate("/admin/rentals/history")}
+          style={{
+            display: "flex", alignItems: "center", gap: 8,
+            background: BLUE, color: "#fff", border: "none",
+            padding: "10px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+            cursor: "pointer", fontFamily: sans,
+          }}
+        >
+          <Activity size={15} /> Historique Mensuel
+        </button>
+      </div>
+
+      {/* ── KPI Cards ── */}
+      <div style={{ display: "flex", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
+        <KpiCard icon={<Clock size={22} />}      count={pending}   label="En attente"  color="#D97706" bg="#FFFBEB" />
+        <KpiCard icon={<CheckCircle size={22} />} count={confirmed} label="Confirmées"  color="#2563EB" bg="#EFF6FF" />
+        <KpiCard icon={<Truck size={22} />}       count={delivered} label="Livrées"     color="#7C3AED" bg="#F5F3FF" />
+      </div>
+
+      {/* ── Search + Filter ── */}
+      <div style={{
+        display: "flex", gap: 12, marginBottom: 20,
+        alignItems: "center", flexWrap: "wrap",
+      }}>
+        {/* Search */}
+        <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
+          <Search size={15} style={{
+            position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
+            color: "#9CA3AF",
+          }} />
+          <input
+            placeholder="Rechercher..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: "100%", paddingLeft: 36, paddingRight: 14, height: 38,
+              border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 13,
+              fontFamily: sans, outline: "none", boxSizing: "border-box",
+              background: "#fff", color: "#374151",
+            }}
+            onFocus={e => e.target.style.borderColor = BLUE}
+            onBlur={e => e.target.style.borderColor = "#E5E7EB"}
+          />
+        </div>
+
+        {/* Status filter */}
+        <select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          style={{
+            height: 38, border: "1px solid #E5E7EB", borderRadius: 8,
+            padding: "0 36px 0 12px", fontSize: 13, fontFamily: sans,
+            background: "#fff", color: "#374151", cursor: "pointer",
+            outline: "none", minWidth: 160,
+            appearance: "auto",
+          }}
+        >
+          <option value="all">Tous les statuts</option>
+          <option value="pending">En attente</option>
+          <option value="awaiting_payment">Paiement requis</option>
+          <option value="confirmed">Confirmée</option>
+          <option value="ongoing">En cours</option>
+          <option value="delivered">Livrée</option>
+          <option value="completed">Terminée</option>
+          <option value="cancelled">Annulée</option>
+        </select>
+      </div>
+
+      {/* ── Table ── */}
+      <div style={{
+        background: "#fff", borderRadius: 14, border: "1px solid #E5E7EB",
+        overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+      }}>
+        {loading ? (
+          <div style={{ padding: "60px 0", textAlign: "center", color: "#9CA3AF", fontSize: 14 }}>
+            Chargement...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding: "60px 0", textAlign: "center", color: "#9CA3AF", fontSize: 14 }}>
+            Aucune location trouvée.
+          </div>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #F3F4F6", background: "#FAFAFA" }}>
+                {["Réservation", "Client", "Véhicule", "Dates", "Total", "Statut", "Actions"].map(h => (
+                  <th key={h} style={{
+                    padding: "12px 16px", textAlign: "left",
+                    fontSize: 12, fontWeight: 700, color: "#6B7280",
+                    letterSpacing: "0.04em", textTransform: "uppercase",
+                    whiteSpace: "nowrap",
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((rental, idx) => {
+                const prog = NEXT_STATUS[rental.status];
+                const canCancel = !["cancelled", "completed"].includes(rental.status);
+                const canInspect = !["cancelled", "awaiting_payment"].includes(rental.status);
+
+                return (
+                  <tr key={rental.id} style={{
+                    borderBottom: idx < filtered.length - 1 ? "1px solid #F9FAFB" : "none",
+                    transition: "background 0.12s",
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#FAFAFA"}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                  >
+                    {/* Réservation ID */}
+                    <td style={{ padding: "14px 16px", fontSize: 13, fontWeight: 700, color: "#374151", whiteSpace: "nowrap" }}>
+                      {fmtId(rental.id)}
+                    </td>
+
+                    {/* Client */}
+                    <td style={{ padding: "14px 16px" }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>
+                        {rental.user_name || `Client #${rental.user_id}`}
+                      </div>
+                      {rental.user_email && (
+                        <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>{rental.user_email}</div>
+                      )}
+                    </td>
+
+                    {/* Véhicule */}
+                    <td style={{ padding: "14px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {rental.car_image ? (
+                          <img
+                            src={`http://localhost:3000${rental.car_image}`}
+                            alt={rental.brand}
+                            style={{ width: 40, height: 30, objectFit: "cover", borderRadius: 6, flexShrink: 0 }}
+                            onError={e => { e.target.style.display = "none"; }}
+                          />
+                        ) : (
+                          <div style={{
+                            width: 40, height: 30, borderRadius: 6, background: "#F3F4F6",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 16, flexShrink: 0,
+                          }}>🚗</div>
+                        )}
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                            {rental.brand} {rental.model}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Dates */}
+                    <td style={{ padding: "14px 16px", whiteSpace: "nowrap" }}>
+                      <div style={{ fontSize: 12, color: "#374151" }}>
+                        {fmt(rental.start_date)} <span style={{ color: "#9CA3AF" }}>→</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: "#374151" }}>
+                        {fmt(rental.end_date)}
+                      </div>
+                    </td>
+
+                    {/* Total */}
+                    <td style={{ padding: "14px 16px", whiteSpace: "nowrap" }}>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "#111827" }}>
+                        {Number(rental.total_price).toLocaleString("fr-FR")}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF" }}>DT</div>
+                    </td>
+
+                    {/* Statut */}
+                    <td style={{ padding: "14px 16px" }}>
+                      <StatusBadge status={rental.status} />
+                    </td>
+
+                    {/* Actions */}
+                    <td style={{ padding: "14px 16px" }}>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "nowrap" }}>
+                        {/* Progress button */}
+                        {prog && (
+                          <button
+                            onClick={() => progressStatus(rental)}
+                            disabled={progressingId === rental.id}
+                            style={{
+                              background: BLUE, color: "#fff", border: "none",
+                              padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600,
+                              cursor: "pointer", fontFamily: sans, whiteSpace: "nowrap",
+                              opacity: progressingId === rental.id ? 0.7 : 1,
+                            }}
+                          >
+                            {progressingId === rental.id ? "..." : prog.label}
+                          </button>
+                        )}
+
+                        {/* Inspection button */}
+                        {canInspect && (
+                          <button
+                            onClick={() => setSelectedRental(rental)}
+                            title="État des lieux"
+                            style={{
+                              background: "#F5F3FF", color: "#7C3AED", border: "1px solid #DDD6FE",
+                              padding: "6px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600,
+                              cursor: "pointer", fontFamily: sans, display: "flex", alignItems: "center", gap: 4,
+                            }}
+                          >
+                            <ClipboardCheck size={13} />
+                          </button>
+                        )}
+
+                        {/* Cancel button */}
+                        {canCancel && (
+                          <button
+                            onClick={() => cancelRental(rental.id)}
+                            disabled={cancellingId === rental.id}
+                            style={{
+                              background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA",
+                              padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600,
+                              cursor: "pointer", fontFamily: sans, whiteSpace: "nowrap",
+                              opacity: cancellingId === rental.id ? 0.7 : 1,
+                            }}
+                          >
+                            {cancellingId === rental.id ? "..." : "Annuler"}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* ── Inspection Modal ── */}
+      {selectedRental && (
+        <InspectionModal
+          rental={selectedRental}
+          isAdmin={true}
+          onClose={() => setSelectedRental(null)}
+        />
+      )}
+    </div>
+  );
 }

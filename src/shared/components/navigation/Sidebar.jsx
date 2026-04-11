@@ -10,6 +10,7 @@ const NAV = [
   { to: '/admin/factures', icon: 'receipt_long', label: 'Factures' },
   { to: '/admin/services', icon: 'build_circle', label: 'Maintenance' },
   { to: '/admin/clients', icon: 'group', label: 'Clients' },
+  { to: '/admin/promos', icon: 'sell', label: 'Codes Promo' },
 ];
 
 const REPORTS = [

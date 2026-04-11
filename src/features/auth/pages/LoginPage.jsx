@@ -1,15 +1,9 @@
-// LoginPage.jsx
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
-const inputStyle = {
-  width: "100%", background: "#fafafa", border: "1px solid #e8e8e8",
-  color: "#0a0a0a", padding: "11px 14px", fontSize: 14,
-  fontFamily: sans, borderRadius: 9, outline: "none",
-  boxSizing: "border-box", transition: "border 0.15s",
-};
+const BLUE = "#2563EB";
 
 export default function LoginPage() {
   const { login } = useContext(AuthContext);
@@ -19,69 +13,131 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
 
+  const fill = (email, password) => setForm({ email, password });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      await login(form); // Uses form.email and form.password
-      navigate("/"); // redirect فقط
-    } catch (err) {
-      if (err.response?.status === 401) {
-        setError("Invalid email or password");
-      } else {
-        setError("Server error");
-      }
-    } finally {
-      setLoading(false);
-    }
+    setError(""); setLoading(true);
+    try { await login(form); navigate("/"); }
+    catch (err) { setError(err.response?.status === 401 ? "Email ou mot de passe incorrect" : "Erreur serveur"); }
+    finally { setLoading(false); }
   };
+
   return (
     <div style={{
-      minHeight: "100vh", background: "#fafafa", fontFamily: sans,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "40px 24px",
+      minHeight: "100vh", fontFamily: sans,
+      display: "flex", background: "#F9FAFB",
     }}>
-      <div style={{ width: "100%", maxWidth: 400 }}>
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <Link to="/" style={{ textDecoration: "none" }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "#0a0a0a", letterSpacing: "0.06em" }}>BMZ</span>
-            <span style={{ fontSize: 12, color: "#bbb", marginLeft: 8 }}>LOCATION</span>
-          </Link>
-        </div>
+      {/* Left — brand panel */}
+      <div style={{
+        flex: 1, background: "#0F172A",
+        display: "flex", flexDirection: "column", justifyContent: "center",
+        padding: "64px 56px",
+      }} className="login-brand-panel">
+        <Link to="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 12, marginBottom: 56 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: BLUE, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/>
+              <rect x="9" y="11" width="14" height="10" rx="2"/>
+              <circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            </svg>
+          </div>
+          <span style={{ fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: "-0.03em" }}>BMZ Location</span>
+        </Link>
 
-        <div style={{
-          background: "#fff", border: "1px solid #ebebeb",
-          borderRadius: 16, padding: "36px 32px",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.04)",
-        }}>
-          <h1 style={{
-            color: "#0a0a0a", fontSize: 24, fontWeight: 800,
-            margin: "0 0 6px", letterSpacing: "-0.02em",
-          }}>Welcome back</h1>
-          <p style={{ color: "#aaa", fontSize: 13, margin: "0 0 28px" }}>
-            Sign in to your account
-          </p>
+        <h2 style={{ fontSize: "clamp(2rem, 3vw, 2.5rem)", fontWeight: 900, color: "#fff", margin: "0 0 16px", letterSpacing: "-0.03em", lineHeight: 1.1 }}>
+          La mobilité premium,<br />accessible à tous.
+        </h2>
+        <p style={{ color: "#94A3B8", fontSize: 16, lineHeight: 1.7, margin: "0 0 48px", maxWidth: 380 }}>
+          Rejoignez des centaines de clients satisfaits. Réservez en 3 minutes, recevez votre véhicule à domicile.
+        </p>
+
+        {/* Stats */}
+        <div style={{ display: "flex", gap: 32 }}>
+          {[{ v: "500+", l: "Clients" }, { v: "98%", l: "Satisfaction" }, { v: "5★", l: "Note" }].map(({ v, l }) => (
+            <div key={l}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: "#fff" }}>{v}</div>
+              <div style={{ fontSize: 12, color: "#64748B", marginTop: 2 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Right — form panel */}
+      <div style={{
+        flex: 1, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        padding: "64px 48px", maxWidth: 560, margin: "0 auto",
+      }}>
+        <div style={{ width: "100%", maxWidth: 420 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: "#111827", margin: "0 0 6px", letterSpacing: "-0.02em" }}>
+            Connexion
+          </h1>
+          <p style={{ color: "#6B7280", fontSize: 14, margin: "0 0 32px" }}>Accédez à votre espace BMZ Location</p>
+
+          {/* Demo accounts */}
+          <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
+            {[
+              { label: "👤 Administrateur", email: "admin@bmz.com", password: "admin123" },
+              { label: "🚗 Client", email: "client@test.com", password: "client123" },
+            ].map(({ label, email, password }) => (
+              <button key={email} onClick={() => fill(email, password)} style={{
+                flex: 1, background: "#F9FAFB", border: "1px solid #E5E7EB",
+                borderRadius: 8, padding: "10px 12px", fontSize: 12, fontWeight: 600,
+                color: "#374151", cursor: "pointer", fontFamily: sans,
+                transition: "all 0.2s",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.color = BLUE; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.color = "#374151"; }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ color: "#666", fontSize: 12, fontWeight: 500, display: "block", marginBottom: 6 }}>Email address</label>
+            {/* Email */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>
+                Adresse email
+              </label>
               <input type="email" required value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                placeholder="you@example.com" style={inputStyle} />
+                placeholder="vous@exemple.com"
+                style={{
+                  width: "100%", padding: "11px 14px", fontSize: 14,
+                  border: "1px solid #E5E7EB", borderRadius: 8, outline: "none",
+                  fontFamily: sans, boxSizing: "border-box", background: "#fff",
+                  color: "#111827", transition: "border 0.2s",
+                }}
+                onFocus={e => e.target.style.borderColor = BLUE}
+                onBlur={e => e.target.style.borderColor = "#E5E7EB"}
+              />
             </div>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ color: "#666", fontSize: 12, fontWeight: 500, display: "block", marginBottom: 6 }}>Password</label>
+
+            {/* Password */}
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>
+                Mot de passe
+              </label>
               <div style={{ position: "relative" }}>
                 <input type={showPassword ? "text" : "password"} required value={form.password}
                   onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                  placeholder="••••••••" style={{ ...inputStyle, paddingRight: 40 }} />
+                  placeholder="••••••••"
+                  style={{
+                    width: "100%", padding: "11px 40px 11px 14px", fontSize: 14,
+                    border: "1px solid #E5E7EB", borderRadius: 8, outline: "none",
+                    fontFamily: sans, boxSizing: "border-box", background: "#fff",
+                    color: "#111827", transition: "border 0.2s",
+                  }}
+                  onFocus={e => e.target.style.borderColor = BLUE}
+                  onBlur={e => e.target.style.borderColor = "#E5E7EB"}
+                />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} style={{
                   position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-                  background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "#999", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", outline: "none"
-                }} title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}>
+                  background: "none", border: "none", cursor: "pointer", color: "#9CA3AF",
+                  fontSize: 15, padding: 0,
+                }}>
                   {showPassword ? "🙈" : "👁️"}
                 </button>
               </div>
@@ -89,37 +145,49 @@ export default function LoginPage() {
 
             {error && (
               <div style={{
-                background: "#fff5f5", border: "1px solid #fecaca", borderRadius: 8,
-                color: "#dc2626", fontSize: 13, padding: "10px 14px", marginBottom: 16,
+                background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8,
+                color: "#DC2626", fontSize: 13, padding: "10px 14px", marginBottom: 16,
               }}>{error}</div>
             )}
 
             <button type="submit" disabled={loading} style={{
-              width: "100%", background: "#0a0a0a", color: "#fff", border: "none",
-              padding: "12px", fontSize: 14, fontFamily: sans, fontWeight: 700,
-              borderRadius: 9, cursor: "pointer", letterSpacing: "-0.01em",
-              opacity: loading ? 0.7 : 1, marginBottom: 12,
-            }}>{loading ? "Signing in..." : "Sign in"}</button>
-
-            <button type="button" onClick={() => window.location.href = 'http://localhost:3000/api/auth/google'} style={{
-              width: "100%", background: "#fff", color: "#0a0a0a", border: "1px solid #e8e8e8",
-              padding: "12px", fontSize: 14, fontFamily: sans, fontWeight: 600,
-              borderRadius: 9, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-              transition: "background 0.2s"
+              width: "100%", background: BLUE, color: "#fff", border: "none",
+              padding: "12px", fontSize: 15, fontFamily: sans, fontWeight: 700,
+              borderRadius: 8, cursor: "pointer", marginBottom: 12,
+              opacity: loading ? 0.7 : 1, transition: "background 0.2s",
             }}>
+              {loading ? "Connexion..." : "Se connecter"}
+            </button>
+
+            <button type="button"
+              onClick={() => window.location.href = "http://localhost:3000/api/auth/google"}
+              style={{
+                width: "100%", background: "#fff", color: "#374151",
+                border: "1px solid #E5E7EB", padding: "11px", fontSize: 14,
+                fontFamily: sans, fontWeight: 600, borderRadius: 8, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                transition: "border 0.2s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = BLUE}
+              onMouseLeave={e => e.currentTarget.style.borderColor = "#E5E7EB"}
+            >
               <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: 18, height: 18 }} />
               Continuer avec Google
             </button>
           </form>
-        </div>
 
-        <p style={{ color: "#aaa", fontSize: 13, textAlign: "center", marginTop: 20 }}>
-          Don't have an account?{" "}
-          <Link to="/register" style={{ color: "#0a0a0a", fontWeight: 600, textDecoration: "none" }}>
-            Register
-          </Link>
-        </p>
+          <p style={{ color: "#6B7280", fontSize: 13, textAlign: "center", marginTop: 24 }}>
+            Pas encore de compte ?{" "}
+            <Link to="/register" style={{ color: BLUE, fontWeight: 600, textDecoration: "none" }}>
+              Créer un compte
+            </Link>
+          </p>
+        </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) { .login-brand-panel { display: none !important; } }
+      `}</style>
     </div>
   );
 }

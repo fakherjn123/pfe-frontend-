@@ -1,4 +1,4 @@
-﻿import api from '../../../config/api.config';
+import api from '../../../config/api.config.js';
 
 /**
  * Statistiques gÃ©nÃ©rales (vÃ©hicules, locationsâDT¦)

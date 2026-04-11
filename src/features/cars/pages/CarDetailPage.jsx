@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Sparkles, Tag, Car, DollarSign, BarChart3, Key, MessageSquare, Calendar, Ban, MapPin, Truck, AlertTriangle, Fuel, Settings, Clock } from "lucide-react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
-import api from "../../../config/api.config";
+import api from "../../../config/api.config.js";
 
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
 
@@ -72,6 +72,10 @@ export default function CarDetailPage() {
   const [deliveryError, setDeliveryError] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
   const [mapCenter, setMapCenter] = useState({ lat: 35.8353, lng: 10.5944 }); // Sousse Sahloul
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoValid, setPromoValid] = useState(false);
+  const [validatingPromo, setValidatingPromo] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -153,14 +157,41 @@ export default function CarDetailPage() {
   };
 
   const discount = userPoints >= 100 ? 10 : 0;
-  const isDiscounted = discount > 0;
-  const originalPricePerDay = car ? car.price_per_day : 0;
-  const pricePerDay = isDiscounted ? Math.round(originalPricePerDay * (1 - discount / 100)) : originalPricePerDay;
+  const hasLoyaltyDiscount = discount > 0;
+  const basePricePerDay = car ? Number(car.price_per_day) : 0;
+  const currentPricePerDay = car?.promotion_price ? Number(car.promotion_price) : basePricePerDay;
+  const pricePerDay = hasLoyaltyDiscount ? Math.round(currentPricePerDay * (1 - discount / 100)) : currentPricePerDay;
+  const isDiscounted = hasLoyaltyDiscount || !!car?.promotion_price;
+  const originalPriceDisplay = basePricePerDay;
 
   const days = startDate && endDate
     ? Math.max(0, Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000))
     : 0;
-  const estimated = (days * pricePerDay + deliveryFee + returnFee).toFixed(2);
+  
+  const estimated = (days * pricePerDay + deliveryFee + returnFee - promoDiscount).toFixed(2);
+
+  const checkPromo = async () => {
+    if (!promoCode.trim()) return;
+    setValidatingPromo(true);
+    try {
+      const res = await api.post("/promos/validate", { code: promoCode });
+      setPromoValid(true);
+      const promo = res.data.promo;
+      let dValue = 0;
+      if (promo.discount_type === 'percentage') {
+        dValue = (days * pricePerDay) * (Number(promo.discount_value) / 100);
+      } else {
+        dValue = Number(promo.discount_value);
+      }
+      setPromoDiscount(dValue);
+      setMessage({ type: "success", text: `Code promo "${promo.code}" appliqué : -${dValue.toFixed(2)} TND` });
+    } catch (err) {
+      setPromoValid(false);
+      setPromoDiscount(0);
+      setMessage({ type: "error", text: err.response?.data?.message || "Code promo invalide." });
+    }
+    setValidatingPromo(false);
+  };
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -186,6 +217,9 @@ export default function CarDetailPage() {
           payload.delivery_lat = deliveryLat;
           payload.delivery_lng = deliveryLng;
         }
+      }
+      if (promoValid && promoCode) {
+        payload.promo_code = promoCode;
       }
       if (deliveryRequested && deliveryError) {
         return setMessage({ type: "error", text: "Veuillez corriger l'adresse de livraison avant de réserver." });
@@ -320,7 +354,7 @@ export default function CarDetailPage() {
               {isDiscounted ? (
                 <>
                   <span style={{ color: "#ef4444", fontSize: 24, fontWeight: 700, textDecoration: 'line-through', marginRight: 8, opacity: 0.7 }}>
-                    {originalPricePerDay}
+                    {originalPriceDisplay}
                   </span>
                   <span style={{ color: "#0a0a0a", fontSize: 48, fontWeight: 900, letterSpacing: "-0.04em" }}>
                     {pricePerDay}
@@ -328,11 +362,12 @@ export default function CarDetailPage() {
                 </>
               ) : (
                 <span style={{ color: "#0a0a0a", fontSize: 48, fontWeight: 900, letterSpacing: "-0.04em" }}>
-                  {originalPricePerDay}
+                  {originalPriceDisplay}
                 </span>
               )}
               <span style={{ color: "#888", fontSize: 15, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>TND / jour</span>
-              {isDiscounted && <span style={{ marginLeft: 12, background: '#fee2e2', color: '#dc2626', padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>-10% VIP</span>}
+              {hasLoyaltyDiscount && <span style={{ marginLeft: 12, background: '#fee2e2', color: '#dc2626', padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>-10% VIP</span>}
+              {car.promotion_price && !hasLoyaltyDiscount && <span style={{ marginLeft: 12, background: 'linear-gradient(135deg, #ef4444, #f43f5e)', color: '#fff', padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>PROMO</span>}
             </div>
           </div>
         </div>
@@ -612,6 +647,40 @@ export default function CarDetailPage() {
               )}
             </div>
 
+            {/* Code Promo */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle}>Code Promo</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  type="text"
+                  placeholder="CODE123"
+                  value={promoCode}
+                  onChange={e => setPromoCode(e.target.value.toUpperCase())}
+                  style={{ ...inputStyle, flex: 1 }}
+                  onFocus={e => { e.target.style.borderColor = '#0a0a0a'; e.target.style.boxShadow = '0 0 0 4px rgba(10,10,10,0.05)'; }}
+                  onBlur={e => { e.target.style.borderColor = '#e5e5e5'; e.target.style.boxShadow = '0 2px 6px rgba(0,0,0,0.01)'; }}
+                />
+                <button
+                  type="button"
+                  onClick={checkPromo}
+                  disabled={validatingPromo || !promoCode}
+                  style={{
+                    padding: '0 16px',
+                    background: '#0a0a0a',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 12,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    opacity: validatingPromo || !promoCode ? 0.5 : 1
+                  }}
+                >
+                  {validatingPromo ? "..." : "Appliquer"}
+                </button>
+              </div>
+            </div>
+
             {/* Avertissement Caution */}
             <div style={{
               background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 12,
@@ -633,12 +702,19 @@ export default function CarDetailPage() {
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
                   <span style={{ color: "#888", fontSize: 13, fontWeight: 500 }}>{days} jour{days > 1 ? "s" : ""} × {pricePerDay} TND</span>
-                  {isDiscounted && <span style={{ color: "#ef4444", fontSize: 12, fontWeight: 800, background: '#fee2e2', padding: '2px 6px', borderRadius: 4 }}>-10% VIP</span>}
+                  {hasLoyaltyDiscount && <span style={{ color: "#ef4444", fontSize: 12, fontWeight: 800, background: '#fee2e2', padding: '2px 6px', borderRadius: 4 }}>-10% VIP</span>}
+                  {car.promotion_price && !hasLoyaltyDiscount && <span style={{ color: "#fff", fontSize: 12, fontWeight: 800, background: '#ef4444', padding: '2px 6px', borderRadius: 4 }}>PROMO</span>}
                 </div>
                 {deliveryRequested && deliveryFee > 0 && (
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
                     <span style={{ color: "#888", fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }}><Truck className="w-4 h-4 text-slate-400" /> Livraison</span>
                     <span style={{ color: "#0a0a0a", fontSize: 13, fontWeight: 700 }}>+{(deliveryFee + returnFee).toFixed(2)} TND</span>
+                  </div>
+                )}
+                {promoDiscount > 0 && (
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                    <span style={{ color: "#dc2626", fontSize: 13, fontWeight: 600 }}>Réduction Code Promo</span>
+                    <span style={{ color: "#dc2626", fontSize: 13, fontWeight: 700 }}>-{promoDiscount.toFixed(2)} TND</span>
                   </div>
                 )}
                 <div style={{ height: 1, background: '#eaeaea', margin: '16px 0' }} />

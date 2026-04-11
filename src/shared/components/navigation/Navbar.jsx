@@ -2,167 +2,169 @@ import { useContext, useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../../features/auth/context/AuthContext";
 import api from "../../../config/api.config";
+import NotificationBell from "../notifications/NotificationBell";
 
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
+
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const BLUE = "#2563EB";
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
-  const [hoveredLink, setHoveredLink] = useState(null);
   const [points, setPoints] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Pages where Navbar is transparent/dark (hero bg)
+  const isHeroPage = location.pathname === "/";
 
   useEffect(() => {
     if (user && user.role !== "admin") {
       api.get("/users/me")
         .then((res) => setPoints(res.data.points || 0))
-        .catch(() => { });
+        .catch(() => {});
     } else {
       setPoints(null);
     }
   }, [user]);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
+  const handleLogout = () => { logout(); navigate("/login"); };
 
   const isActive = (path) => location.pathname === path;
 
-  const navLinks = [
-    { to: "/", label: "Fleet" },
-    ...(user?.role !== "admin" ? [{ to: "/contact", label: "Contact" }] : []),
-    ...(user && user.role !== "admin"
-      ? [
-        { to: "/rentals", label: "My Rentals" },
-        { to: "/facture", label: "Invoices" },
-        { to: "/profile", label: "Profile" },
-      ]
-      : []),
-    ...(user?.role === "admin"
-      ? [
-        { to: "/dashboard", label: "Dashboard" },
-        { to: "/admin/cars", label: "Cars" },
-        { to: "/admin/clients", label: "Clients" },
-        { to: "/admin/payments", label: "Payments" },
-        { to: "/admin/rentals", label: "Rentals" },
-        { to: "/admin/factures", label: "Invoices" },
-        { to: "/admin/services", label: "Maintenance" },
-        { to: "/admin/contacts", label: "Messages" },
-        { to: "/admin/reviews", label: "Reviews" },
-        { to: "/admin/hero", label: "Hero" },
-      ]
-      : []),
+  const publicLinks = [
+    { to: "/", label: "Accueil" },
+    { to: "/cars", label: "Catalogue" },
+    { to: "/contact", label: "Contact" },
   ];
+
+  const clientLinks = [
+    { to: "/rentals", label: "Mes Réservations" },
+    { to: "/facture", label: "Factures" },
+    { to: "/profile", label: "Mon Profil" },
+  ];
+
+  const adminLinks = [
+    { to: "/dashboard", label: "Dashboard" },
+    { to: "/admin/cars", label: "Véhicules" },
+    { to: "/admin/clients", label: "Clients" },
+    { to: "/admin/payments", label: "Paiements" },
+    { to: "/admin/rentals", label: "Locations" },
+    { to: "/admin/factures", label: "Factures" },
+    { to: "/admin/services", label: "Maintenance" },
+    { to: "/admin/contacts", label: "Messages" },
+    { to: "/admin/reviews", label: "Avis" },
+    { to: "/admin/hero", label: "Hero" },
+    { to: "/admin/promos", label: "Promos" },
+    { to: "/admin/ai-dashboard", label: "Smart Pricing" },
+  ];
+
+  const navLinks = user?.role === "admin"
+    ? adminLinks
+    : user
+    ? [...publicLinks, ...clientLinks]
+    : publicLinks;
+
+  // ── Colors depending on page & scroll ──────────────────
+  const navBg = isHeroPage
+    ? scrolled ? "rgba(15,23,42,0.92)" : "transparent"
+    : "#ffffff";
+  const navBorder = isHeroPage
+    ? scrolled ? "1px solid rgba(255,255,255,0.08)" : "none"
+    : "1px solid #E5E7EB";
+  const linkColor = isHeroPage ? "rgba(255,255,255,0.85)" : "#374151";
+  const linkActiveColor = isHeroPage ? "#ffffff" : "#111827";
+  const logoTextColor = isHeroPage ? "#ffffff" : "#111827";
 
   return (
     <>
-      {/* Inject styles */}
       <style>{`
-        @keyframes navSlideDown {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes navDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+        .bmz-nav-link { transition: color 0.18s ease; position: relative; }
+        .bmz-nav-link::after {
+          content:''; position:absolute; bottom:-4px; left:0; width:0; height:2px;
+          background:${BLUE}; border-radius:1px; transition:width 0.2s ease;
         }
-        .nav-link-item {
-          position: relative;
-          transition: all 0.2s ease;
+        .bmz-nav-link.active::after, .bmz-nav-link:hover::after { width:100%; }
+        .bmz-btn-primary {
+          background:${BLUE}; color:#fff; border:none; padding:9px 20px;
+          font-size:14px; font-weight:600; font-family:${sans}; border-radius:8px;
+          cursor:pointer; transition:background 0.2s, transform 0.15s;
         }
-        .nav-link-item::after {
-          content: '';
-          position: absolute;
-          bottom: -2px;
-          left: 50%;
-          width: 0;
-          height: 2px;
-          background: #000;
-          transition: all 0.2s ease;
-          transform: translateX(-50%);
-          border-radius: 1px;
+        .bmz-btn-primary:hover { background:#1d4ed8; transform:translateY(-1px); }
+        .bmz-btn-ghost {
+          background:transparent; color:${isHeroPage ? '#fff' : '#374151'};
+          border:1px solid ${isHeroPage ? 'rgba(255,255,255,0.3)' : '#D1D5DB'};
+          padding:9px 20px; font-size:14px; font-weight:600; font-family:${sans};
+          border-radius:8px; cursor:pointer; transition:all 0.2s;
         }
-        .nav-link-item.active::after,
-        .nav-link-item:hover::after {
-          width: 60%;
-        }
-        .nav-btn {
-          transition: all 0.2s ease;
-        }
-        .nav-btn:hover {
-          transform: translateY(-1px);
-        }
+        .bmz-btn-ghost:hover { border-color:${BLUE}; color:${BLUE}; }
       `}</style>
 
-      {/* Invisible spacer to prevent content overlap caused by fixed Navbar */}
-      <div style={{ height: scrolled ? 60 : 70, transition: "height 0.3s ease", width: "100%", flexShrink: 0 }} />
+      {/* Spacer — only when nav is not overlaying hero */}
+      {!isHeroPage && (
+        <div style={{ height: 64, width: "100%", flexShrink: 0 }} />
+      )}
 
       <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: scrolled
-          ? "rgba(255, 255, 255, 0.85)"
-          : "#fff",
-        backdropFilter: scrolled ? "blur(16px) saturate(180%)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(16px) saturate(180%)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(0,0,0,0.06)" : "1px solid #f0f0f0",
-        fontFamily: sans,
-        transition: "all 0.3s ease",
-        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.04)" : "none",
-        animation: "navSlideDown 0.4s ease",
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000,
+        background: navBg, borderBottom: navBorder,
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
+        fontFamily: sans, transition: "all 0.3s ease",
+        animation: "navDown 0.35s ease",
       }}>
         <div style={{
           maxWidth: 1280, margin: "0 auto", padding: "0 32px",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          height: scrolled ? 60 : 70,
-          transition: "height 0.3s ease",
+          height: 64,
         }}>
-          {/* Logo */}
-          <Link to="/" style={{
-            textDecoration: "none", display: "flex", alignItems: "center", gap: 10,
-            transition: 'transform 0.2s',
-          }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-          >
+
+          {/* ── Logo ── */}
+          <Link to="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: '#000', display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
+              width: 36, height: 36, borderRadius: 10,
+              background: BLUE, display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
             }}>
-              <span style={{ color: '#fff', fontSize: 12, fontWeight: 900, letterSpacing: '-0.03em' }}>B</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/>
+                <rect x="9" y="11" width="14" height="10" rx="2"/>
+                <circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              </svg>
             </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{ fontSize: 17, fontWeight: 900, color: "#000", letterSpacing: "-0.03em" }}>BMZ</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#bbb", letterSpacing: "0.14em" }}>LOCATION</span>
+            <div>
+              <span style={{ fontSize: 18, fontWeight: 800, color: logoTextColor, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                BMZ
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: isHeroPage ? "rgba(255,255,255,0.5)" : "#9CA3AF", letterSpacing: "0.12em", marginLeft: 6 }}>
+                LOCATION
+              </span>
             </div>
           </Link>
 
-          {/* Links */}
-          <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {/* ── Nav Links (desktop) ── */}
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             {navLinks.map(({ to, label }) => (
               <Link
                 key={to}
                 to={to}
-                className={`nav-link-item${isActive(to) ? ' active' : ''}`}
+                className={`bmz-nav-link${isActive(to) ? " active" : ""}`}
                 style={{
-                  color: isActive(to) ? "#000" : "#888",
-                  textDecoration: "none",
-                  fontSize: 13,
-                  fontWeight: isActive(to) ? 700 : 500,
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                }}
-                onMouseEnter={e => {
-                  if (!isActive(to)) e.target.style.color = "#000";
-                  setHoveredLink(to);
-                }}
-                onMouseLeave={e => {
-                  if (!isActive(to)) e.target.style.color = "#888";
-                  setHoveredLink(null);
+                  color: isActive(to) ? linkActiveColor : linkColor,
+                  textDecoration: "none", fontSize: 14,
+                  fontWeight: isActive(to) ? 600 : 400,
+                  padding: "8px 12px", borderRadius: 6,
                 }}
               >
                 {label}
@@ -170,81 +172,43 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Auth */}
+          {/* ── Auth Area ── */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {user ? (
               <>
                 {points !== null && user.role !== "admin" && (
                   <Link to="/profile" style={{
                     display: "flex", alignItems: "center", gap: 6,
-                    background: "#fdf8ee", border: "1px solid rgba(200,169,110,0.35)",
+                    background: "rgba(37,99,235,0.1)", border: "1px solid rgba(37,99,235,0.2)",
                     borderRadius: 20, padding: "5px 12px", textDecoration: "none",
-                    transition: "all 0.2s",
-                  }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "#fef3d0"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "#fdf8ee"; e.currentTarget.style.transform = "none"; }}
-                  >
+                  }}>
                     <span style={{ fontSize: 13 }}>⭐</span>
-                    <span style={{ fontSize: 12, fontWeight: 800, color: points >= 500 ? "#7c3aed" : points >= 200 ? "#b8860b" : points >= 100 ? "#64748b" : "#92400e" }}>
-                      {points} pts
-                    </span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: BLUE }}>{points} pts</span>
                   </Link>
                 )}
+                <NotificationBell />
                 <div style={{
-                  textAlign: "right", marginRight: 6,
-                  display: 'flex', alignItems: 'center', gap: 10,
+                  width: 34, height: 34, borderRadius: "50%",
+                  background: BLUE, display: "flex", alignItems: "center",
+                  justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13,
                 }}>
-                  <div style={{
-                    width: 32, height: 32, borderRadius: '50%',
-                    background: '#f5f5f5', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    color: '#000', fontWeight: 700, fontSize: 12,
-                    border: '1px solid #eee',
-                  }}>
-                    {user.email?.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#000", display: "block", lineHeight: 1.2 }}>
-                      {user.email?.split("@")[0]}
-                    </span>
-                    {user.role === "admin" && (
-                      <span style={{
-                        fontSize: 9, fontWeight: 800, color: "#fff",
-                        background: '#000', padding: '1px 6px', borderRadius: 3,
-                        letterSpacing: '0.06em',
-                      }}>ADMIN</span>
-                    )}
-                  </div>
+                  {user.email?.charAt(0).toUpperCase()}
                 </div>
-                <button className="nav-btn" onClick={handleLogout} style={{
-                  background: "transparent", border: "1px solid #eee",
-                  color: "#888", padding: "7px 16px", fontSize: 12,
-                  borderRadius: 10, cursor: "pointer", fontWeight: 700,
-                  fontFamily: sans,
-                }}
-                  onMouseEnter={e => { e.target.style.borderColor = "#000"; e.target.style.color = "#000"; }}
-                  onMouseLeave={e => { e.target.style.borderColor = "#eee"; e.target.style.color = "#888"; }}
-                >Log out</button>
+                <button onClick={handleLogout} className="bmz-btn-ghost">
+                  Déconnexion
+                </button>
               </>
             ) : (
               <>
-                <Link className="nav-btn" to="/login" style={{
-                  color: "#666", textDecoration: "none", fontSize: 13,
-                  fontWeight: 600, padding: "8px 16px",
-                }}
-                  onMouseEnter={e => e.target.style.color = '#000'}
-                  onMouseLeave={e => e.target.style.color = '#666'}
-                >Sign in</Link>
-                <Link className="nav-btn" to="/register" style={{
-                  color: "#fff", textDecoration: "none", fontSize: 13,
-                  fontWeight: 700, padding: "10px 24px",
-                  background: "#000", borderRadius: 12,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  transition: 'all 0.2s',
-                }}
-                  onMouseEnter={e => { e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)'; e.target.style.transform = 'translateY(-1px)'; }}
-                  onMouseLeave={e => { e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; e.target.style.transform = 'none'; }}
-                >Get started</Link>
+                <Link to="/login" style={{
+                  color: linkColor, textDecoration: "none", fontSize: 14,
+                  fontWeight: 500, padding: "9px 16px",
+                }}>
+                  Connexion
+                </Link>
+                <Link to="/register">
+                  <button className="bmz-btn-primary">Créer un compte</button>
+                </Link>
               </>
             )}
           </div>
