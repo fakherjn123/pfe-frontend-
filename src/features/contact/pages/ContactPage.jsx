@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Send } from 'lucide-react';
 import api from '../../../config/api.config';
+import toast from 'react-hot-toast';
 import Footer from '../../../shared/components/layout/Footer';
 
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
@@ -36,7 +37,7 @@ const ContactPage = () => {
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
       setTimeout(() => setSubmitted(false), 5000);
     } catch {
-      alert("Une erreur est survenue lors de l'envoi.");
+      toast.error("Une erreur est survenue lors de l'envoi.");
     }
   };
 

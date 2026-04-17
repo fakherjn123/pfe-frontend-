@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../config/api.config.js";
-import { Search, Clock, CheckCircle, Truck, Activity, ClipboardCheck } from "lucide-react";
+import toast from "react-hot-toast";
+import { Search, Clock, CheckCircle, Truck, Activity } from "lucide-react";
+import ConfirmModal from "../../../shared/components/modals/ConfirmModal";
 import InspectionModal from "../../../shared/components/modals/InspectionModal";
 
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
@@ -63,9 +65,10 @@ export default function AllRentalsPage() {
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
   const [progressingId, setProgressingId] = useState(null);
-  const [selectedRental, setSelectedRental] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [confirmModal, setConfirmModal] = useState({ open: false });
+  const [inspectionModal, setInspectionModal] = useState({ open: false, rental: null });
 
   useEffect(() => {
     api.get("/rentals/all")
@@ -75,20 +78,31 @@ export default function AllRentalsPage() {
   }, []);
 
   // ── Actions ──────────────────────────────────────────────────
-  const cancelRental = async (rentalId) => {
-    if (!window.confirm("Voulez-vous vraiment annuler cette réservation ?")) return;
-    setCancellingId(rentalId);
-    try {
-      const res = await api.put(`/rentals/admin/cancel/${rentalId}`);
-      if (res.data.requiresRefund) {
-        alert(`⚠️ Réservation annulée.\nRemboursement manuel de ${res.data.refundAmount} DT requis pour ${res.data.clientName}.`);
-      }
-      setRentals(prev => prev.map(r => r.id === rentalId ? { ...r, status: "cancelled" } : r));
-    } catch (err) {
-      alert(err.response?.data?.message || "Erreur.");
-    } finally {
-      setCancellingId(null);
-    }
+  const cancelRental = (rentalId) => {
+    setConfirmModal({
+      open: true,
+      title: 'Annuler la réservation',
+      message: 'Voulez-vous vraiment annuler cette réservation ? Le remboursement sera traité si nécessaire.',
+      confirmText: 'Oui, annuler',
+      danger: true,
+      onConfirm: async () => {
+        setConfirmModal(m => ({ ...m, open: false }));
+        setCancellingId(rentalId);
+        try {
+          const res = await api.put(`/rentals/admin/cancel/${rentalId}`);
+          if (res.data.requiresRefund) {
+            toast(`⚠️ Remboursement de ${res.data.refundAmount} DT requis pour ${res.data.clientName}.`, { icon: '💰', duration: 6000 });
+          } else {
+            toast.success('Réservation annulée avec succès.');
+          }
+          setRentals(prev => prev.map(r => r.id === rentalId ? { ...r, status: 'cancelled' } : r));
+        } catch (err) {
+          toast.error(err.response?.data?.message || "Erreur lors de l'annulation.");
+        } finally {
+          setCancellingId(null);
+        }
+      },
+    });
   };
 
   const progressStatus = async (rental) => {
@@ -98,16 +112,48 @@ export default function AllRentalsPage() {
     try {
       await api.put(`/rentals/admin/status/${rental.id}`, { status: prog.next });
       setRentals(prev => prev.map(r => r.id === rental.id ? { ...r, status: prog.next } : r));
+      toast.success(`Statut mis à jour : ${prog.label}`);
     } catch {
-      // Fallback: try delivery status endpoint
       try {
         await api.put(`/delivery/${rental.id}/delivery-status`, { status: prog.next });
         setRentals(prev => prev.map(r => r.id === rental.id ? { ...r, status: prog.next } : r));
+        toast.success(`Statut mis à jour : ${prog.label}`);
       } catch (err2) {
-        alert("Erreur lors de la mise à jour du statut.");
+        toast.error("Erreur lors de la mise à jour du statut.");
       }
     } finally {
       setProgressingId(null);
+    }
+  };
+
+  const handleDepositUpdate = async (rental) => {
+    const amtStr = prompt("Montant de la caution (DT) bloqué/encaissé :", rental.deposit_amount || 0);
+    if (amtStr === null) return;
+    const deposit_amount = Number(amtStr);
+    const deposit_status = deposit_amount > 0 ? "held" : "pending";
+    try {
+      await api.put(`/rentals/${rental.id}/deposit`, { deposit_amount, deposit_status });
+      toast.success("Caution modifiée avec succès.");
+      setRentals(prev => prev.map(r => r.id === rental.id ? { ...r, deposit_amount, deposit_status } : r));
+    } catch (e) {
+      toast.error("Erreur lors de la MAJ de la caution.");
+    }
+  };
+
+  const handlePenaltyUpdate = async (rental) => {
+    const amtStr = prompt("Montant de la pénalité (DT) (ex: nettoyage extrême) :", rental.penalty_amount || 0);
+    if (amtStr === null) return;
+    const penalty_amount = Number(amtStr);
+    let penalty_reason = rental.penalty_reason;
+    if (penalty_amount > 0) {
+      penalty_reason = prompt("Raison de la pénalité :", rental.penalty_reason || "") || "Non spécifiée";
+    }
+    try {
+      await api.put(`/rentals/${rental.id}/penalty`, { penalty_amount, penalty_reason });
+      toast.success("Pénalité modifiée avec succès.");
+      setRentals(prev => prev.map(r => r.id === rental.id ? { ...r, penalty_amount, penalty_reason } : r));
+    } catch (e) {
+      toast.error("Erreur lors de la MAJ de la pénalité.");
     }
   };
 
@@ -149,7 +195,7 @@ export default function AllRentalsPage() {
           onClick={() => navigate("/admin/rentals/history")}
           style={{
             display: "flex", alignItems: "center", gap: 8,
-            background: BLUE, color: "#fff", border: "none",
+            background: BLUE, color: "#0f172a", border: "none",
             padding: "10px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600,
             cursor: "pointer", fontFamily: sans,
           }}
@@ -245,7 +291,6 @@ export default function AllRentalsPage() {
               {filtered.map((rental, idx) => {
                 const prog = NEXT_STATUS[rental.status];
                 const canCancel = !["cancelled", "completed"].includes(rental.status);
-                const canInspect = !["cancelled", "awaiting_payment"].includes(rental.status);
 
                 return (
                   <tr key={rental.id} style={{
@@ -327,28 +372,13 @@ export default function AllRentalsPage() {
                             onClick={() => progressStatus(rental)}
                             disabled={progressingId === rental.id}
                             style={{
-                              background: BLUE, color: "#fff", border: "none",
+                              background: BLUE, color: "#0f172a", border: "none",
                               padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600,
                               cursor: "pointer", fontFamily: sans, whiteSpace: "nowrap",
                               opacity: progressingId === rental.id ? 0.7 : 1,
                             }}
                           >
                             {progressingId === rental.id ? "..." : prog.label}
-                          </button>
-                        )}
-
-                        {/* Inspection button */}
-                        {canInspect && (
-                          <button
-                            onClick={() => setSelectedRental(rental)}
-                            title="État des lieux"
-                            style={{
-                              background: "#F5F3FF", color: "#7C3AED", border: "1px solid #DDD6FE",
-                              padding: "6px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600,
-                              cursor: "pointer", fontFamily: sans, display: "flex", alignItems: "center", gap: 4,
-                            }}
-                          >
-                            <ClipboardCheck size={13} />
                           </button>
                         )}
 
@@ -367,6 +397,56 @@ export default function AllRentalsPage() {
                             {cancellingId === rental.id ? "..." : "Annuler"}
                           </button>
                         )}
+
+                        <button
+                          onClick={() => handleDepositUpdate(rental)}
+                          title="Gérer la Caution"
+                          className="hover:shadow-sm"
+                          style={{
+                            background: Number(rental.deposit_amount) > 0 ? "#DCFCE7" : "transparent",
+                            color: Number(rental.deposit_amount) > 0 ? "#166534" : "#6B7280",
+                            border: Number(rental.deposit_amount) > 0 ? "1px solid #BBF7D0" : "1px solid #D1D5DB",
+                            padding: "8px 14px",
+                            borderRadius: 10, fontSize: 13, fontWeight: 700,
+                            cursor: "pointer", fontFamily: sans, display: "flex", alignItems: "center", gap: 8,
+                            transition: "all 0.2s"
+                          }}
+                        >
+                          <span style={{ fontSize: 16 }}>🔒</span>
+                          {Number(rental.deposit_amount) > 0 && <span>{Number(rental.deposit_amount)} DT</span>}
+                        </button>
+                        
+                        <button
+                          onClick={() => handlePenaltyUpdate(rental)}
+                          title="Frais Annexes et Pénalités"
+                          className="hover:shadow-sm"
+                          style={{
+                            background: Number(rental.penalty_amount) > 0 ? "#FEF3C7" : "transparent",
+                            color: Number(rental.penalty_amount) > 0 ? "#92400E" : "#6B7280",
+                            border: Number(rental.penalty_amount) > 0 ? "1px solid #FDE68A" : "1px solid #D1D5DB",
+                            padding: "8px 14px",
+                            borderRadius: 10, fontSize: 13, fontWeight: 700,
+                            cursor: "pointer", fontFamily: sans, display: "flex", alignItems: "center", gap: 8,
+                            transition: "all 0.2s"
+                          }}
+                        >
+                          <span style={{ fontSize: 16 }}>⚠️</span>
+                          {Number(rental.penalty_amount) > 0 && <span>{Number(rental.penalty_amount)} DT</span>}
+                        </button>
+
+                        <button
+                          onClick={() => setInspectionModal({ open: true, rental })}
+                          title="État des Lieux"
+                          className="hover:bg-slate-50 hover:shadow-sm"
+                          style={{
+                            background: "transparent", color: "#6B7280", border: "1px solid #D1D5DB",
+                            padding: "8px 14px", borderRadius: 10, fontSize: 13, fontWeight: 700,
+                            cursor: "pointer", fontFamily: sans, display: "flex", alignItems: "center",
+                            transition: "all 0.2s"
+                          }}
+                        >
+                          <span style={{ fontSize: 16 }}>📸</span>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -377,12 +457,21 @@ export default function AllRentalsPage() {
         )}
       </div>
 
-      {/* ── Inspection Modal ── */}
-      {selectedRental && (
-        <InspectionModal
-          rental={selectedRental}
-          isAdmin={true}
-          onClose={() => setSelectedRental(null)}
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        danger={confirmModal.danger}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal(m => ({ ...m, open: false }))}
+      />
+
+      {inspectionModal.open && (
+        <InspectionModal 
+          rental={inspectionModal.rental} 
+          isAdmin={true} 
+          onClose={() => setInspectionModal({ open: false, rental: null })} 
         />
       )}
     </div>

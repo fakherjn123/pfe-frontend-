@@ -8,20 +8,22 @@ import {
 } from 'recharts';
 import { getDashboardStats, getFinancialStats, getTopCars, getMonthlyHistory } from '../api/report.service';
 import api from '../../../config/api.config.js';
+import toast from 'react-hot-toast';
 
-// ── Colour tokens ────────────────────────────────────────────
+// ── Colour tokens (Dark Luxury) ──────────────────────────────
 const C = {
-  primary: '#6366f1',
+  primary: '#2563eb',
   accent: '#0ea5e9',
-  success: '#22c55e',
+  success: '#10b981',
   warning: '#f59e0b',
-  danger: '#f43f5e',
-  gold: '#b4860b',
-  purple: '#8b5cf6',
+  danger: '#ef4444',
+  gold: '#fbbf24',
+  purple: '#7c3aed',
   surface: '#ffffff',
-  border: '#ebebeb',
-  text: '#0a0a0a',
-  muted: '#666666',
+  surfaceHover: '#f8fafc',
+  border: 'rgba(0,0,0,0.06)',
+  text: '#0f172a',
+  muted: '#64748b',
 };
 
 // ── Inject animations ────────────────────────────────────────
@@ -30,20 +32,20 @@ const injectDashStyles = () => {
   const s = document.createElement('style');
   s.id = 'dash-ai-styles';
   s.textContent = `
-    @keyframes fadeSlideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeSlideUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
     @keyframes countUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes pulseGlow { 0%,100% { box-shadow:0 0 0 0 rgba(99,102,241,0.2); } 50% { box-shadow:0 0 24px 6px rgba(99,102,241,0.12); } }
-    @keyframes typingCursor { 0%,100% { border-right-color: rgba(200,169,110,0.8); } 50% { border-right-color: transparent; } }
+    @keyframes pulseGlow { 0%,100% { box-shadow:0 0 0 0 rgba(37,99,235,0.2); } 50% { box-shadow:0 0 28px 6px rgba(37,99,235,0.15); } }
+    @keyframes typingCursor { 0%,100% { border-right-color: rgba(96,165,250,0.8); } 50% { border-right-color: transparent; } }
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-    .kpi-card { animation: fadeSlideUp .4s ease both; transition: transform .2s, box-shadow .2s; cursor:default; }
-    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .kpi-card { animation: fadeSlideUp .45s ease both; transition: transform .25s, box-shadow .25s, border-color .25s; cursor:default; }
+    .kpi-card:hover { transform: translateY(-4px); }
     .chart-panel { animation: fadeSlideUp .5s ease both; }
-    .ai-insight-item { animation: fadeSlideUp .3s ease both; }
-    .ai-typing { border-right: 2px solid rgba(200,169,110,0.8); animation: typingCursor 1s step-end infinite; padding-right: 2px; }
+    .ai-insight-item { animation: fadeSlideUp .35s ease both; }
+    .ai-typing { border-right: 2px solid rgba(96,165,250,0.8); animation: typingCursor 1s step-end infinite; padding-right: 2px; }
   `;
   document.head.appendChild(s);
 };
@@ -69,7 +71,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
     <div style={{
-      background: '#ffffff', border: `1px solid ${C.border}`,
+      background: 'linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))', backdropFilter: 'blur(16px)', border: `1px solid ${C.border}`,
       borderRadius: 10, padding: '10px 14px', fontSize: 13,
       boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
     }}>
@@ -112,14 +114,17 @@ import { Link } from 'react-router-dom';
 const StatCard = ({ icon, label, value, sub, trend, color = C.primary, delay = 0, to }) => {
   const cardContent = (
     <div className="kpi-card" style={{
-      background: C.surface, border: `1px solid ${C.border}`,
-      borderRadius: 16, padding: '20px 22px',
+      background: "linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))",
+      backdropFilter: "blur(16px)",
+      border: `1px solid ${C.border}`,
+      borderRadius: 18, padding: '22px 24px',
       display: 'flex', flexDirection: 'column', gap: 10,
       animationDelay: `${delay}s`,
       height: '100%',
+      boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
     }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 32px ${color}22`; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 16px 48px ${color}25, 0 0 0 1px ${color}30`; e.currentTarget.style.borderColor = color + "35"; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.3)"; e.currentTarget.style.borderColor = C.border; }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{
@@ -223,7 +228,7 @@ export default function Dashboard() {
       link.parentNode.removeChild(link);
     } catch (err) {
       console.error("Export error:", err);
-      alert("Erreur lors de l'exportation du CSV");
+      toast.error("Erreur lors de l'exportation du CSV");
     }
   };
 
@@ -231,9 +236,9 @@ export default function Dashboard() {
   const tabLabels = { overview: 'Vue d\'ensemble', revenue: 'Revenus', fleet: 'Flotte', 'ai-analytics': <><Bot className="w-4 h-4 inline-block mb-1" /> IA Analytics</>, activity: 'Activité' };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: "'Inter', 'Helvetica Neue', sans-serif", color: C.text }}>
+    <div style={{ minHeight: "100vh", background: "#f4f7f6", fontFamily: "'Poppins', 'Inter', 'Helvetica Neue', sans-serif", color: C.text }}>
       {/* Header */}
-      <div style={{ background: "#fff", borderBottom: `1px solid ${C.border}`, padding: "36px 40px" }}>
+      <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.border}`, padding: "36px 40px" }}>
         <div style={{ maxWidth: 1160, margin: "0 auto" }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
             <div>
@@ -248,13 +253,14 @@ export default function Dashboard() {
               onClick={handleExport}
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                background: C.surface, border: `1px solid ${C.border}`,
+                background: 'linear-gradient(135deg,#2563EB,#7C3AED)',
+                border: 'none',
                 padding: '10px 18px', borderRadius: 12, fontSize: 13, fontWeight: 700,
-                color: C.text, cursor: 'pointer', transition: 'all 0.2s',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                color: "#0f172a", cursor: 'pointer', transition: 'all 0.3s ease',
+                boxShadow: '0 6px 20px rgba(37,99,235,0.3)',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#fcfcfc'; e.currentTarget.style.borderColor = C.primary; }}
-              onMouseLeave={e => { e.currentTarget.style.background = C.surface; e.currentTarget.style.borderColor = C.border; }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(37,99,235,0.45)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(37,99,235,0.3)'; }}
             >
               <Download size={16} className="text-primary-500" />
               Exporter Rapport CSV
@@ -359,8 +365,8 @@ export default function Dashboard() {
 
                 {/* Revenue Area Chart */}
                 <div style={{
-                  background: C.surface, border: `1px solid ${C.border}`,
-                  borderRadius: 16, padding: '20px 24px',
+                  background: "linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))", backdropFilter: "blur(12px)", border: `1px solid ${C.border}`,
+                  borderRadius: 18, padding: '20px 24px', boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
                 }}>
                   <div style={{ marginBottom: 20 }}>
                     <div style={{ fontSize: 15, fontWeight: 700 }}>Évolution des Revenus</div>
@@ -397,8 +403,8 @@ export default function Dashboard() {
 
                 {/* Top Cars Pie */}
                 <div style={{
-                  background: C.surface, border: `1px solid ${C.border}`,
-                  borderRadius: 16, padding: '20px 24px',
+                  background: "linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))", backdropFilter: "blur(12px)", border: `1px solid ${C.border}`,
+                  borderRadius: 18, padding: '20px 24px', boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
                 }}>
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ fontSize: 15, fontWeight: 700 }}>Top Véhicules</div>
@@ -438,8 +444,8 @@ export default function Dashboard() {
             {activeTab === 'revenue' && (
               <div className="chart-panel" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 <div style={{
-                  background: C.surface, border: `1px solid ${C.border}`,
-                  borderRadius: 16, padding: '20px 24px', gridColumn: '1 / -1',
+                  background: "linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))", backdropFilter: "blur(12px)", border: `1px solid ${C.border}`,
+                  borderRadius: 18, padding: '20px 24px', boxShadow: "0 8px 32px rgba(0,0,0,0.3)", gridColumn: '1 / -1',
                 }}>
                   <div style={{ marginBottom: 20 }}>
                     <div style={{ fontSize: 15, fontWeight: 700 }}>Revenus & Locations par Mois</div>
@@ -505,8 +511,8 @@ export default function Dashboard() {
               <div className="chart-panel" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 {/* Occupation gauge */}
                 <div style={{
-                  background: C.surface, border: `1px solid ${C.border}`,
-                  borderRadius: 16, padding: '20px 24px',
+                  background: "linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))", backdropFilter: "blur(12px)", border: `1px solid ${C.border}`,
+                  borderRadius: 18, padding: '20px 24px', boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
                 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Jauge d'Occupation</div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -534,8 +540,8 @@ export default function Dashboard() {
 
                 {/* Top cars bars */}
                 <div style={{
-                  background: C.surface, border: `1px solid ${C.border}`,
-                  borderRadius: 16, padding: '20px 24px',
+                  background: "linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))", backdropFilter: "blur(12px)", border: `1px solid ${C.border}`,
+                  borderRadius: 18, padding: '20px 24px', boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
                 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Top Véhicules Loués</div>
                   {topCars.length > 0 ? (
@@ -586,7 +592,7 @@ export default function Dashboard() {
                     disabled={aiLoading}
                     style={{
                       background: aiLoading ? '#334155' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                      color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12,
+                      color: "#0f172a", border: 'none', padding: '12px 24px', borderRadius: 12,
                       fontSize: 14, fontWeight: 700, cursor: aiLoading ? 'not-allowed' : 'pointer',
                       display: 'flex', alignItems: 'center', gap: 10,
                       boxShadow: aiLoading ? 'none' : '0 4px 15px rgba(99,102,241,0.3)',
@@ -653,7 +659,7 @@ export default function Dashboard() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
                           {realAiData.insights.map((insight, idx) => (
                             <div key={idx} style={{
-                              background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`,
+                              background: "#ffffff", border: `1px solid ${C.border}`,
                               borderLeft: `3px solid ${[C.primary, C.gold, C.accent][idx % 3]}`,
                               borderRadius: '0 12px 12px 0', padding: '16px 20px',
                               display: 'flex', gap: 16, alignItems: 'flex-start'

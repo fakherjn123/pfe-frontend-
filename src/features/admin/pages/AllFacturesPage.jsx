@@ -47,13 +47,13 @@ export default function AllFacturesPage() {
     <div style={{ fontFamily: sans, minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       {/* ── Header ────────────────────────────────────────── */}
       <div style={{
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          background: "linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)", borderBottom: "1px solid #e2e8f0",
           padding: "60px 40px", position: "relative", overflow: "hidden"
       }}>
           {/* Glow Effects */}
           <div style={{
               position: 'absolute', top: -100, right: 100, width: 300, height: 300,
-              background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%)',
               borderRadius: '50%', pointerEvents: 'none'
           }} />
           
@@ -61,14 +61,14 @@ export default function AllFacturesPage() {
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
                       <div style={{
-                          width: 72, height: 72, background: 'rgba(255,255,255,0.05)', borderRadius: 24,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+                          width: 72, height: 72, background: 'rgba(0,0,0,0.02)', borderRadius: 24,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', color: "#0f172a",
                           border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)'
                       }}>
                           <Receipt size={32} />
                       </div>
                       <div>
-                          <h1 style={{ color: "#fff", fontSize: 36, fontWeight: 900, margin: '0 0 8px', letterSpacing: "-0.02em" }}>
+                          <h1 style={{ color: "#0f172a", fontSize: 36, fontWeight: 900, margin: '0 0 8px', letterSpacing: "-0.02em" }}>
                               Factures
                           </h1>
                           <p style={{ color: "#94a3b8", fontSize: 16, margin: 0, fontWeight: 500 }}>
@@ -76,7 +76,7 @@ export default function AllFacturesPage() {
                           </p>
                       </div>
                   </div>
-                  <div style={{ textAlign: "right", background: 'rgba(255,255,255,0.03)', padding: '16px 24px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ textAlign: "right", background: "#ffffff", padding: '16px 24px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.05)' }}>
                       <div style={{ color: "#64748b", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
                           Total Affiché
                       </div>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Image as ImageIcon, Plus, Trash2, CheckCircle, XCircle, Layout, Upload } from 'lucide-react';
 import { getHeroImages, addHeroImage, deleteHeroImage, updateHeroImage } from '../api/hero.service';
+import toast from 'react-hot-toast';
+import ConfirmModal from '../../../shared/components/modals/ConfirmModal';
 
 const HeroBannerPage = () => {
     const [images, setImages] = useState([]);
@@ -8,6 +10,7 @@ const HeroBannerPage = () => {
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [preview, setPreview] = useState(null);
+    const [confirmModal, setConfirmModal] = useState({ open: false });
 
     useEffect(() => {
         fetchImages();
@@ -52,14 +55,25 @@ const HeroBannerPage = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Voulez-vous vraiment supprimer cette image ?")) return;
-        try {
-            await deleteHeroImage(id);
-            fetchImages();
-        } catch (error) {
-            console.error("Erreur lors de la suppression", error);
-        }
+    const handleDelete = (id) => {
+        setConfirmModal({
+            open: true,
+            title: 'Supprimer cette image',
+            message: 'Voulez-vous vraiment supprimer cette image de la bannière ?',
+            confirmText: 'Supprimer',
+            danger: true,
+            onConfirm: async () => {
+                setConfirmModal(m => ({ ...m, open: false }));
+                try {
+                    await deleteHeroImage(id);
+                    toast.success('Image supprimée.');
+                    fetchImages();
+                } catch (error) {
+                    toast.error('Erreur lors de la suppression.');
+                    console.error(error);
+                }
+            },
+        });
     };
 
     const toggleStatus = async (image) => {
@@ -72,6 +86,7 @@ const HeroBannerPage = () => {
     };
 
     return (
+        <>
         <div style={{ fontFamily: "'Inter', sans-serif" }} className="pb-16 bg-slate-50 min-h-[calc(100vh-64px)]">
             <div className="bg-white border-b border-slate-100 px-8 py-8 mb-8">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -206,6 +221,17 @@ const HeroBannerPage = () => {
                 )}
             </div>
         </div>
+
+        <ConfirmModal
+            open={confirmModal.open}
+            title={confirmModal.title}
+            message={confirmModal.message}
+            confirmText={confirmModal.confirmText}
+            danger={confirmModal.danger}
+            onConfirm={confirmModal.onConfirm}
+            onCancel={() => setConfirmModal(m => ({ ...m, open: false }))}
+        />
+        </>
     );
 };
 

@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getClientRentals } from '../api/client.service';
 import { getAllFactures, downloadFacture } from '../../factures/api/facture.service';
 import api from '../../../config/api.config';
+import toast from 'react-hot-toast';
 
 const ClientDetail = () => {
     const { id } = useParams();
@@ -53,7 +54,25 @@ const ClientDetail = () => {
             await api.put(`/users/${clientProfile.id}/license-status`, { status, msg });
             setClientProfile(prev => ({ ...prev, driving_license_status: status, driving_license_msg: msg }));
         } catch (error) {
-            alert("Erreur lors de la mise à jour du permis.");
+            toast.error("Erreur lors de la mise à jour du permis.");
+            console.error(error);
+        }
+    };
+
+    const handleBanUpdate = async (is_banned) => {
+        try {
+            let reason = null;
+            if (is_banned) {
+                reason = prompt("Raison de la suspension (ex: Choc grave, Mauvais comportement) :");
+                if (!reason) return;
+            } else {
+                if (!window.confirm("Êtes-vous sûr de vouloir réactiver ce compte ?")) return;
+            }
+            await api.put(`/users/${clientProfile.id}/ban`, { is_banned, ban_reason: reason });
+            setClientProfile(prev => ({ ...prev, is_banned, ban_reason: reason }));
+            toast.success(is_banned ? "Compte suspendu avec succès" : "Compte réactivé");
+        } catch (error) {
+            toast.error("Erreur lors de la mise à jour du statut.");
             console.error(error);
         }
     };
@@ -114,6 +133,11 @@ const ClientDetail = () => {
                                 <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-600">
                                     {clientProfile.role || 'Client'}
                                 </span>
+                                {clientProfile.is_banned && (
+                                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-rose-100 text-rose-700 border border-rose-200">
+                                        🚫 Suspendu : {clientProfile.ban_reason}
+                                    </span>
+                                )}
                             </div>
                             <div className="flex items-center gap-4 text-slate-500 text-sm font-medium mt-2">
                                 <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
@@ -124,6 +148,16 @@ const ClientDetail = () => {
                                     <span className="material-symbols-outlined text-[16px] text-slate-400">mail</span>
                                     {clientProfile.email}
                                 </div>
+                                
+                                <button 
+                                    onClick={() => handleBanUpdate(!clientProfile.is_banned)}
+                                    className={`ml-auto text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${clientProfile.is_banned ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-100'}`}
+                                >
+                                    <span className="material-symbols-outlined text-[16px]">
+                                        {clientProfile.is_banned ? 'lock_open' : 'block'}
+                                    </span>
+                                    {clientProfile.is_banned ? 'Réactiver' : 'Bannir'}
+                                </button>
                             </div>
                             
                             {/* License quick actions */}

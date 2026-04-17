@@ -1,8 +1,9 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, CheckCircle, XCircle, DollarSign, Search, LayoutGrid, List, Fuel, Settings, Edit2, Archive, Camera, Sparkles, AlertTriangle, ArchiveRestore } from 'lucide-react';
 import api from '../../../config/api.config.js';
 import { generateCarDescription } from '../../reviews/api/ai.service';
+import toast from 'react-hot-toast';
 
 const EMPTY_FORM = { id: null, brand: '', model: '', price_per_day: '', promotion_price: '', status: 'available', image: null, existingImage: null, description: '', fuel_type: 'Essence', transmission: 'Manuelle' };
 const FILTERS = ['Tous', 'Disponible', 'Loué', 'Maintenance'];
@@ -101,7 +102,7 @@ export default function Cars() {
       if (err.response?.data?.message === 'active_rentals') {
         setArchiveWarning(true);
       } else {
-        alert(err.response?.data?.message || "Erreur lors de l'archivage.");
+        toast.error(err.response?.data?.message || "Erreur lors de l'archivage.");
         setArchiveId(null);
       }
     }
@@ -116,7 +117,7 @@ export default function Cars() {
       setArchiveId(null);
       setArchiveWarning(false);
     } catch (err) {
-      alert(err.response?.data?.message || "Erreur lors de l'archivage forcé.");
+      toast.error(err.response?.data?.message || "Erreur lors de l'archivage forcé.");
     }
     setArchiving(false);
   };

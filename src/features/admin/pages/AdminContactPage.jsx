@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, CheckCircle2, Archive, Trash2, Loader2, Calendar, MapPin, Phone, Building2, Plus, Edit2, Info } from 'lucide-react';
 import api from '../../../config/api.config';
+import toast from 'react-hot-toast';
+import ConfirmModal from '../../../shared/components/modals/ConfirmModal';
 
 const AdminContactPage = () => {
     const [activeTab, setActiveTab] = useState('messages'); // 'messages' or 'coordonnees'
@@ -15,6 +17,7 @@ const AdminContactPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({ id: null, type: 'address', label: '', value: '' });
+    const [confirmModal, setConfirmModal] = useState({ open: false });
 
     // --- FETCH DATA ---
     useEffect(() => {
@@ -59,14 +62,25 @@ const AdminContactPage = () => {
         }
     };
 
-    const deleteMessage = async (id) => {
-        if (!window.confirm("Êtes-vous sûr de vouloir supprimer définitivement ce message ?")) return;
-        try {
-            await api.delete(`/contacts/${id}`);
-            setMessages(messages.filter(m => m.id !== id));
-        } catch (err) {
-            console.error("Erreur suppression message", err);
-        }
+    const deleteMessage = (id) => {
+        setConfirmModal({
+            open: true,
+            title: 'Supprimer le message',
+            message: 'Êtes-vous sûr de vouloir supprimer définitivement ce message ?',
+            confirmText: 'Supprimer',
+            danger: true,
+            onConfirm: async () => {
+                setConfirmModal(m => ({ ...m, open: false }));
+                try {
+                    await api.delete(`/contacts/${id}`);
+                    setMessages(messages.filter(m => m.id !== id));
+                    toast.success('Message supprimé.');
+                } catch (err) {
+                    toast.error('Erreur lors de la suppression.');
+                    console.error(err);
+                }
+            },
+        });
     };
 
     // --- DETAILS HANDLERS ---
@@ -83,18 +97,29 @@ const AdminContactPage = () => {
             setShowModal(false);
         } catch (error) {
             console.error("Erreur sauvegarde coordonnée", error);
-            alert("Erreur lors de la sauvegarde.");
+            toast.error("Erreur lors de la sauvegarde.");
         }
     };
 
-    const deleteDetail = async (id) => {
-        if (!window.confirm("Voulez-vous vraiment supprimer cette coordonnée ?")) return;
-        try {
-            await api.delete(`/contacts/info/${id}`);
-            setDetails(details.filter(d => d.id !== id));
-        } catch (err) {
-            console.error("Erreur suppression coordonnée", err);
-        }
+    const deleteDetail = (id) => {
+        setConfirmModal({
+            open: true,
+            title: 'Supprimer la coordonnée',
+            message: 'Voulez-vous vraiment supprimer cette coordonnée de contact ?',
+            confirmText: 'Supprimer',
+            danger: true,
+            onConfirm: async () => {
+                setConfirmModal(m => ({ ...m, open: false }));
+                try {
+                    await api.delete(`/contacts/info/${id}`);
+                    setDetails(details.filter(d => d.id !== id));
+                    toast.success('Coordonnée supprimée.');
+                } catch (err) {
+                    toast.error('Erreur lors de la suppression.');
+                    console.error(err);
+                }
+            },
+        });
     };
 
     const openEditModal = (detail) => {
@@ -132,6 +157,7 @@ const AdminContactPage = () => {
     };
 
     return (
+        <>
         <main className="flex-1 overflow-y-auto p-6 min-h-full">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
@@ -348,6 +374,17 @@ const AdminContactPage = () => {
                 </div>
             )}
         </main>
+
+        <ConfirmModal
+            open={confirmModal.open}
+            title={confirmModal.title}
+            message={confirmModal.message}
+            confirmText={confirmModal.confirmText}
+            danger={confirmModal.danger}
+            onConfirm={confirmModal.onConfirm}
+            onCancel={() => setConfirmModal(m => ({ ...m, open: false }))}
+        />
+        </>
     );
 };
 

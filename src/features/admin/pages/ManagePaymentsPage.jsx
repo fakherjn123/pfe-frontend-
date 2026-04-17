@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../config/api.config";
+import toast from "react-hot-toast";
+import ConfirmModal from "../../../shared/components/modals/ConfirmModal";
 
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
 
@@ -9,6 +11,10 @@ export default function ManagePaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
   const [refundingId, setRefundingId] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', danger: false, onConfirm: null });
+
+  const openConfirm = (opts) => setConfirmModal({ open: true, ...opts });
+  const closeConfirm = () => setConfirmModal(m => ({ ...m, open: false }));
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -28,45 +34,70 @@ export default function ManagePaymentsPage() {
 
   useEffect(() => { fetchPayments(); }, []);
 
-  const confirmCash = async (id) => {
-    if (!window.confirm("Confirmer la réception de ce paiement en espèces ? Cela générera la facture et enverra un email de confirmation.")) return;
-    setProcessingId(id);
-    try {
-      await api.put(`/payments/confirm-cash/${id}`);
-      fetchPayments();
-      alert("Paiement validé avec succès !");
-    } catch (err) {
-      alert(err.response?.data?.message || "Erreur lors de la confirmation du paiement");
-    } finally {
-      setProcessingId(null);
-    }
+  const confirmCash = (id) => {
+    openConfirm({
+      title: 'Confirmer le paiement en espèces',
+      message: 'Confirmez-vous la réception de ce paiement en espèces ?',
+      confirmText: 'Oui, confirmer',
+      danger: false,
+      onConfirm: async () => {
+        closeConfirm();
+        setProcessingId(id);
+        try {
+          await api.put(`/payments/confirm-cash/${id}`);
+          fetchPayments();
+          toast.success('Paiement en cash validé avec succès !');
+        } catch (err) {
+          toast.error(err.response?.data?.message || 'Erreur lors de la confirmation du paiement');
+        } finally {
+          setProcessingId(null);
+        }
+      },
+    });
   };
 
-  const rejectCash = async (id) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir refuser ce paiement et annuler la réservation ? Un email sera envoyé au client.")) return;
-    setProcessingId(id);
-    try {
-      await api.put(`/payments/reject-cash/${id}`);
-      fetchPayments();
-      alert("Paiement et réservation refusés avec succès !");
-    } catch (err) {
-      alert(err.response?.data?.message || "Erreur lors du refus du paiement");
-    } finally {
-      setProcessingId(null);
-    }
+  const rejectCash = (id) => {
+    openConfirm({
+      title: 'Refuser ce paiement',
+      message: 'Êtes-vous sûr de vouloir refuser ce paiement ? La réservation sera annulée.',
+      confirmText: 'Oui, refuser',
+      danger: true,
+      onConfirm: async () => {
+        closeConfirm();
+        setProcessingId(id);
+        try {
+          await api.put(`/payments/reject-cash/${id}`);
+          fetchPayments();
+          toast.success('Paiement refusé et réservation annulée.');
+        } catch (err) {
+          toast.error(err.response?.data?.message || 'Erreur lors du refus du paiement');
+        } finally {
+          setProcessingId(null);
+        }
+      },
+    });
   };
 
-  const processRefund = async (id) => {
-    if (!window.confirm("Confirmer que le remboursement a été effectué ? Un email de confirmation sera envoyé au client.")) return;
-    setRefundingId(id);
-    try {
-      await api.put(`/payments/refund/${id}`);
-      fetchPayments();
-    } catch (err) {
-      alert(err.response?.data?.message || "Erreur lors du remboursement");
-    } finally {
-      setRefundingId(null);
-    }
+  const processRefund = (id) => {
+    openConfirm({
+      title: 'Confirmer le remboursement',
+      message: 'Confirmez-vous que le remboursement a bien été effectué ?',
+      confirmText: 'Oui, remboursé',
+      danger: false,
+      onConfirm: async () => {
+        closeConfirm();
+        setRefundingId(id);
+        try {
+          await api.put(`/payments/refund/${id}`);
+          fetchPayments();
+          toast.success('Remboursement marqué comme effectué.');
+        } catch (err) {
+          toast.error(err.response?.data?.message || 'Erreur lors du remboursement');
+        } finally {
+          setRefundingId(null);
+        }
+      },
+    });
   };
 
   // Stats
@@ -161,7 +192,7 @@ export default function ManagePaymentsPage() {
                             onClick={() => processRefund(p.id)}
                             disabled={refundingId === p.id}
                             style={{
-                              background: "#16a34a", color: "#fff", border: "none",
+                              background: "#16a34a", color: "#0f172a", border: "none",
                               padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 700,
                               cursor: refundingId === p.id ? "not-allowed" : "pointer",
                               opacity: refundingId === p.id ? 0.7 : 1, transition: "opacity 0.2s",
@@ -234,25 +265,27 @@ export default function ManagePaymentsPage() {
                               onClick={() => confirmCash(p.id)}
                               disabled={processingId === p.id}
                               style={{
-                                background: "#000", color: "#fff", border: "none",
-                                padding: "8px 12px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                                background: "#16a34a", color: "#fff", border: "none",
+                                padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 700,
                                 cursor: processingId === p.id ? "not-allowed" : "pointer",
-                                opacity: processingId === p.id ? 0.7 : 1
+                                opacity: processingId === p.id ? 0.7 : 1,
+                                display: "flex", alignItems: "center", gap: 6,
+                                boxShadow: "0 2px 8px rgba(22,163,74,0.3)",
                               }}
                             >
-                              {processingId === p.id ? "Traitement..." : "✓ Accepter"}
+                              ✓ {processingId === p.id ? "Traitement..." : "Accepter le Cash"}
                             </button>
                             <button
                               onClick={() => rejectCash(p.id)}
                               disabled={processingId === p.id}
                               style={{
-                                background: "#fff", color: "#dc2626", border: "1px solid #fecaca",
-                                padding: "8px 12px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                                background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca",
+                                padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 700,
                                 cursor: processingId === p.id ? "not-allowed" : "pointer",
-                                opacity: processingId === p.id ? 0.7 : 1
+                                opacity: processingId === p.id ? 0.7 : 1,
                               }}
                             >
-                              ❌ Refuser
+                              ✕ Refuser
                             </button>
                           </div>
                         )}
@@ -265,6 +298,16 @@ export default function ManagePaymentsPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        danger={confirmModal.danger}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirm}
+      />
     </div>
   );
 }

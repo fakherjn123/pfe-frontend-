@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../../config/api.config';
 import { Car, ArchiveRestore, Archive, Fuel, Settings, ChevronLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function ArchivedCarsPage() {
     const [cars, setCars] = useState([]);
@@ -26,7 +27,7 @@ export default function ArchivedCarsPage() {
             await api.put(`/cars/${id}/unarchive`);
             setCars(prev => prev.filter(c => c.id !== id));
         } catch (err) {
-            alert(err.response?.data?.message || "Erreur lors de la désarchivage.");
+            toast.error(err.response?.data?.message || "Erreur lors du désarchivage.");
         }
         setUnarchivingId(null);
     };

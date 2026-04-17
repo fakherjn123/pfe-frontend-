@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../../config/api.config.js';
+import toast from 'react-hot-toast';
 import {
   LineChart, Line, RadarChart, Radar, PolarGrid,
   PolarAngleAxis, ResponsiveContainer, Tooltip, BarChart, Bar,
@@ -97,7 +98,7 @@ export default function AIDashboardPage() {
   const fetchAIInsights = useCallback(async () => {
     setLoadingAI(true);
     try {
-      const res = await api.get('/dashboard/ai-insights');
+      const res = await api.get('/dashboard/insights');
       setAiInsights(res.data?.insights || res.data);
     } catch (err) {
       console.error('AI insights error:', err);
@@ -142,7 +143,7 @@ export default function AIDashboardPage() {
       setTimeout(() => setSuccessMsg(""), 4000);
       fetchYieldSuggestions();
     } catch {
-      alert("Erreur lors de l'application du tarif.");
+      toast.error("Erreur lors de l'application du tarif.");
     } finally {
       setApplyingId(null);
     }
@@ -242,7 +243,7 @@ export default function AIDashboardPage() {
       {/* ── Performance Score Banner ── */}
       <div style={{
         background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
-        borderRadius: 16, padding: "28px 32px", marginBottom: 24, color: "#fff",
+        borderRadius: 16, padding: "28px 32px", marginBottom: 24, color: "#0f172a",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 24 }}>
           <div>

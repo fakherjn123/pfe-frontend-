@@ -6,6 +6,8 @@ export const rentCar = (data) =>
 export const getMyRentals = () =>
   api.get("/rentals/my");
 
-// URL corrigée: était /rentals/${id}/confirm
 export const cancelRental = (id) =>
   api.put(`/rentals/cancel/${id}`);
+
+export const getCancellationPreview = (id) =>
+  api.get(`/rentals/cancel-preview/${id}`);

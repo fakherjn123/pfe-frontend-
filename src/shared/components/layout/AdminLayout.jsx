@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../features/auth/context/AuthContext";
 import NotificationBell from "../notifications/NotificationBell";
 
-const sans = "'Inter', 'Helvetica Neue', sans-serif";
+const sans = "'Poppins', 'Inter', sans-serif";
 const BLUE = "#2563EB";
 
 const NAV_ITEMS = [
@@ -36,15 +36,17 @@ export default function AdminLayout({ children, title, subtitle }) {
   const sideW = collapsed ? 64 : SIDEBAR_W;
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", fontFamily: sans, background: "#F1F5F9" }}>
+    <div style={{ display: "flex", minHeight: "100vh", fontFamily: sans, background: "#f4f7f6" }}>
 
       {/* ═══════════ SIDEBAR ═══════════ */}
       <aside style={{
-        width: sideW, flexShrink: 0, background: "#0F172A",
+        width: sideW, flexShrink: 0,
+        background: "linear-gradient(180deg, #03060f 0%, #060b1a 100%)",
         display: "flex", flexDirection: "column",
         position: "fixed", top: 0, bottom: 0, left: 0, zIndex: 200,
         transition: "width 0.25s ease", overflow: "hidden",
-        boxShadow: "4px 0 24px rgba(0,0,0,0.15)",
+        boxShadow: "4px 0 32px rgba(0,0,0,0.5)",
+        borderRight: "1px solid rgba(255,255,255,0.05)",
       }}>
         {/* Logo */}
         <div style={{
@@ -116,18 +118,21 @@ export default function AdminLayout({ children, title, subtitle }) {
                 gap: collapsed ? 0 : 10,
                 justifyContent: collapsed ? "center" : "flex-start",
                 padding: collapsed ? "10px" : "9px 12px",
-                borderRadius: 8, marginBottom: 2, textDecoration: "none",
-                background: active ? "rgba(37,99,235,0.25)" : "transparent",
-                color: active ? "#fff" : "rgba(255,255,255,0.5)",
-                transition: "all 0.15s",
-                borderLeft: active ? `3px solid ${BLUE}` : "3px solid transparent",
+                borderRadius: 10, marginBottom: 3, textDecoration: "none",
+                background: active
+                  ? "linear-gradient(135deg, rgba(37,99,235,0.2), rgba(124,58,237,0.15))"
+                  : "transparent",
+                color: active ? "#fff" : "rgba(255,255,255,0.45)",
+                transition: "all 0.2s ease",
+                border: active ? "1px solid rgba(37,99,235,0.3)" : "1px solid transparent",
+                boxShadow: active ? "0 4px 16px rgba(37,99,235,0.15)" : "none",
               }}
-                onMouseEnter={e => { if (!active) { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "#fff"; } }}
-                onMouseLeave={e => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,0.5)"; } }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "rgba(255,255,255,0.8)"; } }}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,0.45)"; } }}
               >
                 <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1 }}>{icon}</span>
                 {!collapsed && (
-                  <span style={{ fontSize: 13, fontWeight: active ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <span style={{ fontSize: 13, fontWeight: active ? 700 : 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: sans }}>
                     {label}
                   </span>
                 )}
@@ -185,43 +190,51 @@ export default function AdminLayout({ children, title, subtitle }) {
 
         {/* Top Header */}
         <header style={{
-          background: "#fff", borderBottom: "1px solid #E5E7EB",
+          background: "rgba(6,11,26,0.92)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
           padding: "0 32px", height: 64,
           display: "flex", alignItems: "center", justifyContent: "space-between",
           position: "sticky", top: 0, zIndex: 100,
-          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
         }}>
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,rgba(37,99,235,.3),rgba(124,58,237,.3),transparent)" }} />
           <div>
             {title && (
-              <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#111827", letterSpacing: "-0.02em" }}>
+              <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#f1f5f9", letterSpacing: "-0.03em", fontFamily: sans }}>
                 {title}
               </h1>
             )}
             {subtitle && (
-              <p style={{ margin: 0, fontSize: 12, color: "#6B7280", marginTop: 1 }}>{subtitle}</p>
+              <p style={{ margin: 0, fontSize: 12, color: "#475569", marginTop: 1, fontFamily: sans }}>{subtitle}</p>
             )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <NotificationBell />
             <div style={{
-              display: "flex", alignItems: "center", gap: 8,
-              background: "#F9FAFB", border: "1px solid #E5E7EB",
-              borderRadius: 8, padding: "6px 10px",
+              display: "flex", alignItems: "center", gap: 9,
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 10, padding: "6px 12px",
             }}>
               <div style={{
-                width: 26, height: 26, borderRadius: "50%", background: BLUE,
+                width: 28, height: 28, borderRadius: "50%",
+                background: "linear-gradient(135deg,#2563EB,#7C3AED)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#fff", fontWeight: 700, fontSize: 11,
+                color: "#fff", fontWeight: 800, fontSize: 12,
+                boxShadow: "0 2px 10px rgba(37,99,235,0.3)",
               }}>
                 {user?.email?.charAt(0).toUpperCase()}
               </div>
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#cbd5e1", fontFamily: sans }}>
                 {user?.email?.split("@")[0]}
               </span>
               <span style={{
-                fontSize: 9, fontWeight: 800, color: "#fff",
-                background: BLUE, padding: "2px 6px", borderRadius: 4,
-                letterSpacing: "0.06em",
+                fontSize: 9, fontWeight: 900, color: "#0f172a",
+                background: "linear-gradient(135deg,#60a5fa,#a78bfa)",
+                padding: "2px 7px", borderRadius: 5,
+                letterSpacing: "0.08em", fontFamily: sans,
               }}>
                 ADMIN
               </span>

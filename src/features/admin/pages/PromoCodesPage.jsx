@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Ticket, Plus, Trash2, Calendar, Hash, Percent, DollarSign, Pencil, X, Check } from 'lucide-react';
 import api from "../../../config/api.config.js";
+import toast from "react-hot-toast";
+import ConfirmModal from "../../../shared/components/modals/ConfirmModal";
 
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
 const BLUE = "#2563EB";
@@ -217,7 +219,7 @@ function PromoForm({ initial = null, onSave, onCancel }) {
       </div>
       <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
         <button type="submit" style={{
-          background: BLUE, color: "#fff", border: "none",
+          background: BLUE, color: "#0f172a", border: "none",
           padding: "10px 24px", borderRadius: 8, fontSize: 13, fontWeight: 700,
           cursor: "pointer", fontFamily: sans, display: "flex", alignItems: "center", gap: 6,
         }}>
@@ -241,7 +243,7 @@ export default function PromoCodesPage() {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
-  const [message, setMessage] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ open: false });
 
   useEffect(() => { fetchCodes(); }, []);
 
@@ -254,8 +256,8 @@ export default function PromoCodesPage() {
   };
 
   const notify = (type, text) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3500);
+    if (type === 'success') toast.success(text);
+    else toast.error(text);
   };
 
   const handleCreate = async (form) => {
@@ -287,13 +289,22 @@ export default function PromoCodesPage() {
     } catch { notify('error', 'Erreur mise à jour statut.'); }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Supprimer ce code promo ?")) return;
-    try {
-      await api.delete(`/promos/${id}`);
-      setCodes(prev => prev.filter(c => c.id !== id));
-      notify('success', 'Code supprimé.');
-    } catch { notify('error', 'Erreur lors de la suppression.'); }
+  const handleDelete = (id) => {
+    setConfirmModal({
+      open: true,
+      title: 'Supprimer le code promo',
+      message: 'Êtes-vous sûr de vouloir supprimer définitivement ce code promo ?',
+      confirmText: 'Supprimer',
+      danger: true,
+      onConfirm: async () => {
+        setConfirmModal(m => ({ ...m, open: false }));
+        try {
+          await api.delete(`/promos/${id}`);
+          setCodes(prev => prev.filter(c => c.id !== id));
+          notify('success', 'Code supprimé.');
+        } catch { notify('error', 'Erreur lors de la suppression.'); }
+      },
+    });
   };
 
   const activeCount   = codes.filter(c => c.is_active).length;
@@ -326,20 +337,6 @@ export default function PromoCodesPage() {
           {showAdd ? <><X size={14} /> Annuler</> : <><Plus size={14} /> Nouveau code</>}
         </button>
       </div>
-
-      {/* ── Toast ── */}
-      {message && (
-        <div style={{
-          marginBottom: 16, padding: "12px 16px", borderRadius: 10,
-          background: message.type === "success" ? "#F0FDF4" : "#FEF2F2",
-          border: `1px solid ${message.type === "success" ? "#BBF7D0" : "#FECACA"}`,
-          color: message.type === "success" ? "#166534" : "#DC2626",
-          fontSize: 13, fontWeight: 600,
-          display: "flex", alignItems: "center", gap: 8,
-        }}>
-          {message.type === "success" ? "✅" : "❌"} {message.text}
-        </div>
-      )}
 
       {/* ── Create Form ── */}
       {showAdd && !editTarget && (
@@ -383,6 +380,16 @@ export default function PromoCodesPage() {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        danger={confirmModal.danger}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal(m => ({ ...m, open: false }))}
+      />
     </div>
   );
 }

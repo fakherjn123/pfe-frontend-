@@ -100,8 +100,8 @@ const Services = () => {
             {/* Loading */}
             {loading && (
                 <div className="flex items-center justify-center py-16 gap-3 text-slate-500">
-                    <span className="material-symbols-outlined animate-spin text-primary text-3xl">autorenew</span>
-                    <span>Chargement depuis la base de donnéesDT</span>
+                    <span className="material-symbols-outlined animate-spin text-slate-900 text-3xl">autorenew</span>
+                    <span>Chargement depuis la base de données...</span>
                 </div>
             )}
 
@@ -274,7 +274,7 @@ const Services = () => {
                                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Détails</label>
                                 <input
                                     type="text"
-                                    placeholder="Ex: Filtres, bougies, huileDT"
+                                    placeholder="Ex: Filtres, bougies, huile..."
                                     value={form.details}
                                     onChange={e => setForm({ ...form, details: e.target.value })}
                                     className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-primary/30 outline-none"
@@ -321,12 +321,12 @@ const Services = () => {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold shadow transition-all cursor-pointer disabled:opacity-60"
+                                    className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold shadow transition-all cursor-pointer disabled:opacity-60"
                                 >
                                     {saving ? (
                                         <span className="flex items-center gap-2">
                                             <span className="material-symbols-outlined animate-spin text-sm">autorenew</span>
-                                            EnregistrementDT
+                                            Enregistrement...
                                         </span>
                                     ) : 'Planifier'}
                                 </button>

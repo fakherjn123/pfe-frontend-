@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { createPayment } from "../api/payment.service";
 import api from "../../../config/api.config";
+import toast from "react-hot-toast";
 
 const sans = "'Inter', 'Helvetica Neue', sans-serif";
 
@@ -54,13 +55,13 @@ export default function PaymentPage() {
   }, [rentalId]);
 
   const handlePay = async () => {
-    if (!rentalId) return alert("Invalid rental.");
+    if (!rentalId) return toast.error("Réservation invalide.");
     // Card validation
     if (method === "card") {
-      if (cardNumber.replace(/\s/g, "").length < 16) return alert("Numéro de carte invalide.");
-      if (!cardName.trim()) return alert("Nom du titulaire requis.");
-      if (cardExpiry.length < 5) return alert("Date d'expiration invalide.");
-      if (cardCvv.length < 3) return alert("CVV invalide.");
+      if (cardNumber.replace(/\s/g, "").length < 16) return toast.error("Numéro de carte invalide.");
+      if (!cardName.trim()) return toast.error("Nom du titulaire requis.");
+      if (cardExpiry.length < 5) return toast.error("Date d'expiration invalide.");
+      if (cardCvv.length < 3) return toast.error("CVV invalide.");
     }
     setProcessing(true);
     try {
@@ -68,7 +69,7 @@ export default function PaymentPage() {
       setDone(true);
       setTimeout(() => navigate("/rentals"), 2500);
     } catch (err) {
-      alert(err.response?.data?.message || "Payment failed.");
+      toast.error(err.response?.data?.message || "Erreur lors du paiement.");
     }
     setProcessing(false);
   };
